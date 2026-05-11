@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import { fontVariables } from "@/config/font.config";
 import { cn } from "@/lib/utils";
 import Providers from "@/theme/providers";
 import { ThemeProvider } from "@/theme/theme-provider";
@@ -6,7 +7,7 @@ import { DEFAULT_THEME, THEMES } from "@/theme/theme.config";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
-import "./globals.css";
+import "../styles/globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,16 +34,12 @@ export default async function RootLayout({
   const isValidTheme = THEMES.some((t) => t.value === activeThemeValue);
   const themeToApply = isValidTheme ? activeThemeValue! : DEFAULT_THEME;
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
+    <html lang="en" suppressHydrationWarning data-theme={themeToApply}>
       <head />
       <body
         className={cn(
           "bg-background overflow-x-hidden overscroll-none font-sans antialiased",
-          // fontVariables,
+          fontVariables,
         )}
       >
         <ThemeProvider

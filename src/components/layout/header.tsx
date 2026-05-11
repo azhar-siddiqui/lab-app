@@ -1,4 +1,5 @@
 import { ThemeModeToggle } from "@/theme/theme-mode-toggle";
+import { ThemeSelector } from "@/theme/theme-selector";
 import { Breadcrumbs } from "../common/breadcrumbs";
 import SearchInput from "../common/search-input";
 import { Separator } from "../ui/separator";
@@ -18,7 +19,9 @@ export function Header() {
           <SearchInput />
         </div>
         <ThemeModeToggle />
-        <div className="hidden sm:block">{/* <ThemeSelector /> */}</div>
+        <div className="hidden sm:block">
+          <ThemeSelector />
+        </div>
       </div>
     </header>
   );
