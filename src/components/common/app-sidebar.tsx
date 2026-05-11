@@ -157,7 +157,7 @@ export default function AppSidebar({ user }: Readonly<AppSidebarProps>) {
                   >
                     {user && (
                       <UserAvatarProfile
-                        className="h-8 w-8 rounded-lg"
+                        className="h-8 w-8 after:rounded-lg"
                         showInfo
                         user={user}
                       />
