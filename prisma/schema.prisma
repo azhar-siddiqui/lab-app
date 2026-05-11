@@ -126,6 +126,8 @@ model TestGroup {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
+
+  @@map("testGroup")
 }
 
 model TestCategory {
@@ -140,6 +142,8 @@ model TestCategory {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
+
+  @@map("testCategory")
 }
 
 model Test {
@@ -164,6 +168,8 @@ model Test {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
+
+  @@map("test")
 }
 
 model TestUnit {
@@ -177,6 +183,8 @@ model TestUnit {
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id])
   userId    String
+
+  @@map("testUnit")
 }
 
 model Patient {
@@ -203,6 +211,8 @@ model Patient {
   user           User            @relation(fields: [userId], references: [id])
   userId         String
   patientReports PatientReport[]
+
+  @@map("patient")
 }
 
 model Doctor {
@@ -218,10 +228,19 @@ model Doctor {
   user           User            @relation(fields: [userId], references: [id])
   userId         String
   patientReports PatientReport[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("doctor")
 }
 
 model PatientReport {
-  id        String @id @default(uuid())
+  id String @id @default(uuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   patientId String
 
   patient Patient @relation(fields: [patientId], references: [id])
@@ -239,6 +258,8 @@ model PatientReport {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
+
+  @@map("patientReport")
 }
 
 model PatientReportItem {
@@ -261,4 +282,6 @@ model PatientReportItem {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("patientReportItem")
 }
