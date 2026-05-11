@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -6,6 +5,36 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  USER
+  DOCTOR
+  PATIENT
+  ADMIN
+}
+
+enum Designation {
+  Mr
+  Mrs
+  Miss
+  Mohd
+  Baby
+  Dr
+  Child
+  Other
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum Age {
+  Year
+  Month
+  Days
 }
 
 model User {
@@ -18,6 +47,14 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+
+  testGroup      TestGroup[]
+  testCategorys  TestCategory[]
+  tests          Test[]
+  testUnits      TestUnit[]
+  patients       Patient[]
+  doctors        Doctor[]
+  patientReports PatientReport[]
 
   @@unique([email])
   @@map("user")
@@ -69,4 +106,159 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model TestGroup {
+  id                              String  @id @default(uuid())
+  name                            String  @unique
+  shortName                       String  @unique
+  price                           Decimal @db.Decimal(10, 2)
+  isTestGroupNameVissibleOnReport Boolean @default(false)
+  description                     String?
+  interpretation                  String?
+
+  testCategoryId String
+  testCategory   TestCategory @relation(fields: [testCategoryId], references: [id])
+  tests          Test[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model TestCategory {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  testGroup TestGroup[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Test {
+  id                String  @id @default(uuid())
+  name              String
+  normalValueMale   String
+  normalValueFemale String
+  isOptionalTest    Boolean @default(false)
+  description       String?
+  position          Int
+
+  testGroupId String
+  testGroup   TestGroup @relation(fields: [testGroupId], references: [id])
+
+  testUnitId String
+  testUnit   TestUnit @relation(fields: [testUnitId], references: [id])
+
+  reportItems PatientReportItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model TestUnit {
+  id           String  @id @default(uuid())
+  name         String  @db.VarChar(100)
+  unitCategory String? @db.VarChar(100)
+
+  tests Test[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model Patient {
+  id             String      @id @default(uuid())
+  date           String
+  name           String      @db.VarChar(100)
+  contactNumber  String?     @db.VarChar(20)
+  designation    Designation
+  gender         Gender
+  age            String
+  ageType        Age         @default(Year)
+  email          String?
+  address        String?
+  role           Role        @default(PATIENT)
+  totalRs        Decimal     @default(0) @db.Decimal(10, 2)
+  discount       Decimal     @default(0) @db.Decimal(5, 2)
+  ammountRecived Decimal     @default(0) @db.Decimal(10, 2)
+  balance        Decimal     @default(0) @db.Decimal(10, 2)
+  remarks        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id])
+  userId         String
+  patientReports PatientReport[]
+}
+
+model Doctor {
+  id    String  @id @default(uuid())
+  name  String  @db.VarChar(100)
+  email String? @db.VarChar(150)
+
+  commission     Decimal @default(0) @db.Decimal(5, 2)
+  contactNumber  String? @db.VarChar(20)
+  specialization String? @db.VarChar(250)
+  role           Role    @default(DOCTOR)
+
+  user           User            @relation(fields: [userId], references: [id])
+  userId         String
+  patientReports PatientReport[]
+}
+
+model PatientReport {
+  id        String @id @default(uuid())
+  patientId String
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  doctorId String?
+  doctor   Doctor? @relation(fields: [doctorId], references: [id])
+
+  reportDate DateTime @default(now())
+
+  totalAmount Decimal @default(0) @db.Decimal(10, 2)
+
+  remarks String?
+
+  reportItems PatientReportItem[]
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model PatientReportItem {
+  id String @id @default(uuid())
+
+  patientReportId String
+  patientReport   PatientReport @relation(fields: [patientReportId], references: [id])
+
+  testId String
+  test   Test   @relation(fields: [testId], references: [id])
+
+  // Actual patient value
+  resultValue String
+
+  // Optional snapshot values
+  normalRange String?
+  unitName    String?
+
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
