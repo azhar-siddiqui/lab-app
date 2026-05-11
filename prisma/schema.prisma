@@ -134,6 +134,7 @@ model TestCategory {
   id          String  @id @default(uuid())
   name        String  @unique
   description String?
+  category    String?
 
   testGroup TestGroup[]
 
