@@ -53,4 +53,8 @@ export const THEMES = [
     name: "WhatsApp",
     value: "whatsapp",
   },
+  {
+    name: "Caffeine",
+    value: "caffeine",
+  },
 ];
