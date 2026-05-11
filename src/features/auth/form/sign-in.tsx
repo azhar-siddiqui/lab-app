@@ -4,7 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -21,12 +23,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-
-// const _PASSWORD = "Admin@1234"
 
 const formSchema = z.object({
   email: z.email("Please enter a valid email address."),
@@ -37,6 +38,8 @@ const formSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
+const TEP_PASSWORD = "Admin@1234";
+
 type SignInValues = z.infer<typeof formSchema>;
 
 export default function SignInForm() {
@@ -46,7 +49,7 @@ export default function SignInForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "azhar1@medicare.com",
-      password: "Admin@1234",
+      password: TEP_PASSWORD,
       rememberMe: false,
     },
   });
@@ -64,33 +67,38 @@ export default function SignInForm() {
           },
         },
       );
+
       if (error) {
-        toast.error(error?.message);
+        toast.error(error.message);
       }
     });
   }
 
   return (
-    <Card className="w-full sm:max-w-sm">
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>Enter your credentials to continue.</CardDescription>
+    <Card className="w-full space-y-6 max-w-87.5">
+      <CardHeader className="flex flex-col items-center w-full space-y-6">
+        <CardTitle className="text-2xl font-bold tracking-tight">
+          Sign In
+        </CardTitle>
+        <CardDescription>
+          Sign in to continue to{" "}
+          <span className="font-semibold text-primary">Medicare Dashboard</span>
+        </CardDescription>
       </CardHeader>
-
       <CardContent>
         <form id="form-login" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            {/* ✅ EMAIL */}
             <Controller
               name="email"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-email">Email</FieldLabel>
+                  <FieldLabel htmlFor="email">Email</FieldLabel>
                   <Input
                     {...field}
-                    id="form-email"
+                    id="email"
                     placeholder="example@email.com"
+                    className="h-8.5"
                   />
                   {fieldState.error && (
                     <FieldError errors={[fieldState.error]} />
@@ -99,18 +107,18 @@ export default function SignInForm() {
               )}
             />
 
-            {/* ✅ PASSWORD */}
             <Controller
               name="password"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
                   <Input
                     {...field}
-                    id="form-password"
+                    id="password"
                     type="password"
                     placeholder="********"
+                    className="h-8.5"
                   />
                   {fieldState.error && (
                     <FieldError errors={[fieldState.error]} />
@@ -128,37 +136,53 @@ export default function SignInForm() {
                   orientation="horizontal"
                 >
                   <Checkbox
-                    id="form-remember-me"
+                    id="rememberMe"
                     name={field.name}
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="hidden sm:block"
                   />
-                  <FieldLabel htmlFor="form-remember-me">
+                  <FieldLabel htmlFor="rememberMe" className="hidden sm:block">
                     Remember me
                   </FieldLabel>
+
+                  <Button type="button" variant="link" className="pl-0 sm:pl-2">
+                    Forgot password?
+                  </Button>
                 </Field>
               )}
             />
           </FieldGroup>
         </form>
       </CardContent>
-
-      <CardFooter>
-        <Field orientation="horizontal">
+      <CardFooter className="flex flex-col">
+        <Field>
+          <Button
+            type="submit"
+            form="form-login"
+            size="lg"
+            disabled={isPending}
+          >
+            Continue
+          </Button>
           <Button
             type="button"
             variant="outline"
             onClick={() => form.reset()}
-            disabled={isPending}
+            size="lg"
           >
             Reset
           </Button>
-
-          {/* ✅ FIXED FORM ID */}
-          <Button type="submit" form="form-login" disabled={isPending}>
-            Login
-          </Button>
         </Field>
+        <p className="mt-6 text-center text-sm text-accent-foreground">
+          Don't have an account ?{" "}
+          <Link
+            href="/auth/sign-up"
+            className={cn(buttonVariants({ variant: "link" }))}
+          >
+            Sign up
+          </Link>
+        </p>
       </CardFooter>
     </Card>
   );

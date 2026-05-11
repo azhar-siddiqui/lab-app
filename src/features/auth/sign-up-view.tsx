@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function SignUpViewPage() {
   return (
-    <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="relative h-screen flex-col items-center justify-center md:grid  lg:grid-cols-2 lg:px-0">
       <Link
         href="/examples/authentication"
         className={cn(
@@ -57,47 +57,9 @@ export default function SignUpViewPage() {
         </div>
       </div>
       <div className="flex h-full items-center justify-center p-4 lg:p-8">
-        <div className="flex w-full max-w-md flex-col items-center justify-center space-y-6">
-          {/* github link  */}
-          {/* <Link
-            className={cn('group inline-flex hover:text-yellow-200')}
-            target='_blank'
-            href={'https://github.com/kiranism/next-shadcn-dashboard-starter'}
-          >
-            <div className='flex items-center'>
-              <GitHubLogoIcon className='size-4' />
-              <span className='ml-1 inline'>Star on GitHub</span>{' '}
-            </div>
-            <div className='ml-2 flex items-center gap-1 text-sm md:flex'>
-              <Icons.exclusive
-                className='size-4 text-gray-500 transition-all duration-300 group-hover:text-yellow-300'
-                fill='currentColor'
-              />
-              <span className='font-display font-medium'>{stars}</span>
-            </div>
-          </Link> */}
+        <div className="flex w-full flex-col items-center justify-center space-y-6">
           <SignUpForm />
-          <div className="text-muted-foreground space-y-2 px-8 text-center text-xs">
-            <p>
-              This is an{" "}
-              <Link
-                href="/about"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                open-source project
-              </Link>{" "}
-              for demo purposes. Authentication is handled securely by Clerk.
-            </p>
-            <p>
-              <Link
-                href="https://github.com/kiranism/next-shadcn-dashboard-starter"
-                target="_blank"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                View on GitHub
-              </Link>
-            </p>
-          </div>
+
           <p className="text-muted-foreground px-8 text-center text-sm">
             By clicking continue, you agree to our{" "}
             <Link

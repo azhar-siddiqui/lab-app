@@ -60,28 +60,6 @@ export default function SignInViewPage() {
       <div className="flex h-full items-center justify-center p-4 lg:p-8">
         <div className="flex w-full max-w-md flex-col items-center justify-center space-y-6">
           <SignInForm />
-          <div className="text-muted-foreground space-y-2 px-8 text-center text-xs">
-            <p>
-              This is an{" "}
-              <Link
-                href="/about"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                open-source project
-              </Link>{" "}
-              for demo purposes. Authentication is handled securely by Clerk.
-            </p>
-            <p>
-              <Link
-                href="https://github.com/kiranism/next-shadcn-dashboard-starter"
-                target="_blank"
-                className="hover:text-primary underline underline-offset-4"
-              >
-                View on GitHub
-              </Link>
-            </p>
-          </div>
-
           <p className="text-muted-foreground px-8 text-center text-sm">
             By clicking continue, you agree to our{" "}
             <Link
