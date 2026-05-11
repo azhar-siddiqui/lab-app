@@ -1,0 +1,44 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StripEmptyObjects } from "better-auth";
+
+interface UserAvatarProfileProps {
+  className?: string;
+  showInfo?: boolean;
+  user:
+    | StripEmptyObjects<
+        {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null;
+        } & Record<string, unknown>
+      >
+    | undefined;
+}
+
+export function UserAvatarProfile({
+  className,
+  showInfo = false,
+  user,
+}: Readonly<UserAvatarProfileProps>) {
+  return (
+    <div className="flex items-center gap-2">
+      <Avatar className={className}>
+        <AvatarImage src={user?.image || ""} alt={user?.name || ""} />
+        <AvatarFallback className="rounded-lg">
+          {user?.name?.slice(0, 2)?.toUpperCase() || "CN"}
+        </AvatarFallback>
+      </Avatar>
+
+      {showInfo && (
+        <div className="grid flex-1 text-left text-sm leading-tight">
+          <span className="truncate font-semibold">{user?.name || ""}</span>
+          <span className="truncate text-xs">{user?.email || ""}</span>
+        </div>
+      )}
+    </div>
+  );
+}
