@@ -26,7 +26,7 @@ export default function NotFound() {
         </Button>
         <Button
           onClick={() => router.push("/dashboard")}
-          variant="ghost"
+          variant="outline"
           size="lg"
         >
           <Home /> Back to Home
