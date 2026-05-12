@@ -1,0 +1,518 @@
+"use client";
+
+import { RichTextEditor } from "@/components/rich-text-editor/editor";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import {
+  testGroupFormSchema,
+  TestGroupFormValuesType,
+} from "@/validation/test-group";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckIcon, ChevronsUpDownIcon, Loader, Save } from "lucide-react";
+import { Fragment, useState, useTransition } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { TestCategoryType, UnitType } from "./action";
+import { UnitForm } from "./unit-form";
+
+interface TestGroupFormProps {
+  testCategories: TestCategoryType[];
+  testUnit: UnitType[];
+}
+
+export function TestGroupForm({
+  testCategories,
+  testUnit,
+}: Readonly<TestGroupFormProps>) {
+  const [open, setOpen] = useState<boolean>(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm<TestGroupFormValuesType>({
+    resolver: zodResolver(testGroupFormSchema),
+    defaultValues: {
+      testGroupName: "",
+      shortName: "",
+      category: "",
+      price: "",
+      isOptionalTestGroupNameOnReport: false,
+      interpretation: "",
+      testRows: [
+        {
+          testName: "",
+          unit: "",
+          normalMale: "",
+          normalFemale: "",
+          optional: false,
+        },
+      ],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "testRows",
+  });
+
+  function onSubmit(data: TestGroupFormValuesType) {
+    console.log(data);
+  }
+
+  return (
+    <form
+      id="form-rhf-demo"
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="mt-4"
+    >
+      <FieldGroup className="gap-4">
+        <div className="grid gap-4 grid-cols-12">
+          <Controller
+            name="testGroupName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field
+                data-invalid={fieldState.invalid}
+                className="col-span-12 xl:col-span-4"
+              >
+                <FieldLabel htmlFor="testGroupName">Test Group Name</FieldLabel>
+                <Input
+                  id="testGroupName"
+                  placeholder={
+                    fieldState.error?.message ?? "Enter Test Group Name"
+                  }
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="off"
+                  autoFocus
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            name="shortName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field
+                data-invalid={fieldState.invalid}
+                className="col-span-12 xl:col-span-4"
+              >
+                <FieldLabel htmlFor="shortName">Short Name</FieldLabel>
+                <Input
+                  id="shortName"
+                  placeholder={fieldState.error?.message ?? "Enter Short Name"}
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="off"
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            name="category"
+            control={form.control}
+            render={({ field, fieldState }) => {
+              // Find the selected category based on the reference ID (field.value)
+              const selectedCategory = testCategories?.find(
+                (item) => item.id === field.value,
+              );
+
+              return (
+                <Field
+                  data-invalid={fieldState.invalid}
+                  className="col-span-12 xl:col-span-4"
+                >
+                  <FieldLabel htmlFor="form-category">Category</FieldLabel>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          id="form-category"
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={open}
+                          aria-invalid={fieldState.invalid}
+                          className="bg-background hover:bg-background w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]"
+                        >
+                          {selectedCategory ? (
+                            <span className="flex min-w-0 items-center gap-2">
+                              <span className="truncate">
+                                {selectedCategory.name}
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Select Category
+                            </span>
+                          )}
+                          <ChevronsUpDownIcon
+                            className="text-muted-foreground/80 shrink-0"
+                            aria-hidden="true"
+                          />
+                        </Button>
+                      }
+                    />
+                    <PopoverContent
+                      className="border-input w-full min-w-(--radix-popper-anchor-width) p-0"
+                      align="start"
+                    >
+                      <Command>
+                        <CommandInput placeholder="Search Category..." />
+                        <CommandList>
+                          <CommandEmpty>No item found.</CommandEmpty>
+                          {testCategories.map((item) => (
+                            <Fragment key={item.id}>
+                              <CommandGroup>
+                                <CommandItem
+                                  key={item.id}
+                                  value={item.id} // Use ID as the value
+                                  onSelect={(currentValue: string) => {
+                                    field.onChange(currentValue); // Set the ID in the form field
+                                    setOpen(false);
+                                  }}
+                                  className="pl-6 rounded-none"
+                                >
+                                  {item.name}
+                                  {field.value === item.id && (
+                                    <CheckIcon size={16} className="ml-auto" />
+                                  )}
+                                </CommandItem>
+                              </CommandGroup>
+                            </Fragment>
+                          ))}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
+              );
+            }}
+          />
+          <Controller
+            name="price"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field
+                data-invalid={fieldState.invalid}
+                className="col-span-12 xl:col-span-4"
+              >
+                <FieldLabel htmlFor="form-price">Price</FieldLabel>
+                <Input
+                  {...field}
+                  id="form-price"
+                  aria-invalid={fieldState.invalid}
+                  placeholder={fieldState.error?.message ?? "Enter Price"}
+                  autoComplete="off"
+                  type="number"
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            name="isOptionalTestGroupNameOnReport"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field
+                data-invalid={fieldState.invalid}
+                orientation="horizontal"
+                className="col-span-12 xl:col-span-4 self-end border px-2 py-1.75 rounded-lg has-data-[state=checked]:bg-input/30 has-data-[state=checked]:text-foreground  has-data-[state=checked]:z-10"
+              >
+                <Checkbox
+                  id="form-isOptionalTestGroupNameOnReport"
+                  name={field.name}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor="form-isOptionalTestGroupNameOnReport">
+                  Display test group in the report
+                </FieldLabel>
+              </Field>
+            )}
+          />
+          <UnitForm />
+          <Button
+            className="w-full col-span-12 xl:col-span-2 self-end "
+            type="button"
+            variant="outline"
+            onClick={() =>
+              append({
+                testName: "",
+                unit: "",
+                normalMale: "",
+                normalFemale: "",
+                optional: false,
+              })
+            }
+          >
+            Add Test Row
+          </Button>
+
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="col-span-12 gap-4 border border-inpuut p-4 rounded-lg flex items-center"
+            >
+              {/* Index */}
+              <div className="flex justify-center items-center border border-input rounded-lg px-3 h-8 bg-input/30 self-start mt-6 lg:self-end">
+                {index + 1}
+              </div>
+              <div className="grid gap-4 grid-cols-12 flex-1">
+                <Controller
+                  name={`testRows.${index}.testName`}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="col-span-12 md:col-span-6 lg:col-span-3"
+                    >
+                      <FieldLabel htmlFor={`testRows.${index}.testName`}>
+                        Test Name
+                      </FieldLabel>
+                      <Input
+                        id={`testRows.${index}.testName`}
+                        placeholder={fieldState.error?.message ?? "Test Name"}
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                    </Field>
+                  )}
+                />
+
+                {/* Unit */}
+                <Controller
+                  name={`testRows.${index}.unit`}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <UnitCombobox
+                      field={field}
+                      fieldState={fieldState}
+                      index={index}
+                      units={testUnit}
+                      openIndex={openIndex}
+                      setOpenIndex={setOpenIndex}
+                    />
+                  )}
+                />
+
+                {/* Normal Male */}
+                <Controller
+                  name={`testRows.${index}.normalMale`}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="col-span-12 md:col-span-6 lg:col-span-2"
+                    >
+                      <FieldLabel htmlFor={`testRows.${index}.normalMale`}>
+                        Normal Value (Male)
+                      </FieldLabel>
+                      <Input
+                        id={`testRows.${index}.normalMale`}
+                        placeholder={fieldState.error?.message ?? "10 - 20"}
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                    </Field>
+                  )}
+                />
+
+                {/* Normal Female */}
+                <Controller
+                  name={`testRows.${index}.normalFemale`}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="col-span-12 md:col-span-6 lg:col-span-2"
+                    >
+                      <FieldLabel htmlFor={`testRows.${index}.normalFemale`}>
+                        Normal Value (Female)
+                      </FieldLabel>
+                      <Input
+                        id={`testRows.${index}.normalFemale`}
+                        placeholder={fieldState.error?.message ?? "10 - 20"}
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                    </Field>
+                  )}
+                />
+
+                {/* Optional Checkbox */}
+                <Controller
+                  name={`testRows.${index}.optional`}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      orientation="horizontal"
+                      className="self-end border px-2 h-8 rounded-lg has-data-[state=checked]:bg-input/30 has-data-[state=checked]:text-foreground  has-data-[state=checked]:z-10 col-span-12 md:col-span-6 lg:col-span-2"
+                    >
+                      <Checkbox
+                        id={`testRows.${index}.optional`}
+                        name={field.name}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <FieldLabel htmlFor={`testRows.${index}.optional`}>
+                        Optional
+                      </FieldLabel>
+                    </Field>
+                  )}
+                />
+
+                {/* Remove Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => remove(index)}
+                  className="col-span-12 self-end md:col-span-6 lg:col-span-1"
+                >
+                  Remove
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          <Controller
+            name="interpretation"
+            control={form.control}
+            render={({ field }) => (
+              <Field className="col-span-12">
+                <FieldLabel htmlFor="interpretation">Interpretation</FieldLabel>
+                <RichTextEditor field={field} />
+              </Field>
+            )}
+          />
+        </div>
+      </FieldGroup>
+      <Button
+        type="submit"
+        className="w-full sm:w-fit mt-8"
+        disabled={isPending}
+      >
+        {isPending ? (
+          <>
+            Saving
+            <Loader className="animate-spin" />
+          </>
+        ) : (
+          <>
+            Save & Next
+            <Save className="size-4" />
+          </>
+        )}
+      </Button>
+    </form>
+  );
+}
+
+function UnitOptions({
+  units,
+  value,
+  onSelect,
+}: Readonly<{
+  units: { id: string; name: string }[];
+  value?: string;
+  onSelect: (val: string) => void;
+}>) {
+  return (
+    <CommandGroup heading="Units">
+      {units.map((unit) => (
+        <CommandItem key={unit.id} value={unit.id} onSelect={onSelect}>
+          {unit.name}
+          {value === unit.name && <CheckIcon size={16} className="ml-auto" />}
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  );
+}
+
+function UnitCombobox({
+  field,
+  fieldState,
+  index,
+  units,
+  openIndex,
+  setOpenIndex,
+}: any) {
+  const selectedUnit = units.find(
+    (item: { id: string; name: string }) => item.id === field.value,
+  );
+
+  const handleUnitSelect =
+    (onChange: (val: string) => void) => (value: string) => {
+      onChange(value);
+      setOpenIndex(null);
+    };
+
+  return (
+    <Field
+      data-invalid={fieldState.invalid}
+      className="col-span-12 md:col-span-6 lg:col-span-2"
+    >
+      <FieldLabel htmlFor={`testRows.${index}.unit`}>Unit</FieldLabel>
+      <Popover
+        open={openIndex === index}
+        onOpenChange={(isOpen) => setOpenIndex(isOpen ? index : null)}
+      >
+        <PopoverTrigger
+          render={
+            <Button
+              id={`testRows.${index}.unit`}
+              variant="outline"
+              role="combobox"
+              aria-expanded={openIndex === index}
+              aria-invalid={fieldState.invalid}
+              className={cn(
+                "justify-between font-normal",
+                fieldState.invalid && "border-destructive text-destructive",
+              )}
+            >
+              {selectedUnit ? (
+                <span className="truncate">{selectedUnit.name}</span>
+              ) : (
+                <span className="text-muted-foreground">Select Unit</span>
+              )}
+
+              <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          }
+        />
+
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            <CommandInput placeholder="Search Unit..." />
+            <CommandList>
+              <CommandEmpty>No unit found.</CommandEmpty>
+
+              <UnitOptions
+                units={units}
+                value={field.value}
+                onSelect={handleUnitSelect(field.onChange)}
+              />
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </Field>
+  );
+}

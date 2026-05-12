@@ -1,6 +1,11 @@
 import PageContainer from "@/components/layout/page-container";
+import { GetAllUnit, GetTestCategory } from "./_components/action";
+import { TestGroupForm } from "./_components/test-group-form";
 
-export default function NewTestGroupPage() {
+export default async function NewTestGroupPage() {
+  const testCategories = await GetTestCategory();
+  const testUnit = await GetAllUnit();
+
   return (
     <PageContainer>
       <div className="flex flex-col space-y-2">
@@ -11,6 +16,8 @@ export default function NewTestGroupPage() {
           of the page.
         </p>
       </div>
+
+      <TestGroupForm testCategories={testCategories} testUnit={testUnit} />
     </PageContainer>
   );
 }

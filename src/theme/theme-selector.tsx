@@ -16,7 +16,7 @@ import { THEMES } from "./theme.config";
 
 export function ThemeSelector() {
   const { activeTheme, setActiveTheme } = useThemeConfig();
-  console.log("activeTheme", activeTheme);
+
   return (
     <Select
       value={activeTheme}
