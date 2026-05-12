@@ -1,3 +1,4 @@
+import { CreatTestUnit } from "@/actions/test-unit/create-test-unit";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,16 +12,18 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { tryCatch } from "@/utils/try-catch";
 import { UnitFormValuesType, unitFromSchema } from "@/validation/test-group";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader, SaveIcon } from "lucide-react";
 
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export function UnitForm() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isPending, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition();
 
   const form = useForm<UnitFormValuesType>({
     resolver: zodResolver(unitFromSchema),
@@ -29,8 +32,26 @@ export function UnitForm() {
     },
   });
 
+  // CreatTestUnit;
+
   function onSubmit(formValues: UnitFormValuesType) {
-    console.log(formValues);
+    startTransition(async () => {
+      const { data: result, error } = await tryCatch(CreatTestUnit(formValues));
+
+      if (error) {
+        toast.error(
+          error.message ?? "An unexpected error occor please try again",
+        );
+      }
+
+      if (result?.status === "success") {
+        toast.success(result.message);
+        form.reset();
+        setIsOpen(false);
+      } else if (result?.status === "error") {
+        toast.error(result.message);
+      }
+    });
   }
 
   return (
@@ -85,7 +106,7 @@ export function UnitForm() {
                 <Button
                   variant="outline"
                   type="button"
-                  disabled={isPending}
+                  disabled={pending}
                   onClick={() => {
                     form.reset();
                   }}
@@ -96,10 +117,10 @@ export function UnitForm() {
             ></DialogClose>
             <Button
               type="button"
-              disabled={isPending}
+              disabled={pending}
               onClick={form.handleSubmit(onSubmit)}
             >
-              {isPending ? (
+              {pending ? (
                 <>
                   Saving <Loader className="animate-spin" />
                 </>

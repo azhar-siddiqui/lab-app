@@ -1,5 +1,6 @@
+import { GetTestCategory } from "@/actions/test-category/get-test-category";
+import { GetAllUnit } from "@/actions/test-unit/get-test-unit";
 import PageContainer from "@/components/layout/page-container";
-import { GetAllUnit, GetTestCategory } from "./_components/action";
 import { TestGroupForm } from "./_components/test-group-form";
 
 export default async function NewTestGroupPage() {

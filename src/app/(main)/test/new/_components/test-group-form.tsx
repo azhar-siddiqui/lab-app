@@ -1,5 +1,8 @@
 "use client";
 
+import { TestCategoryType } from "@/actions/test-category/get-test-category";
+import { CreateTestGroup } from "@/actions/test-group/create-test-group";
+import { UnitType } from "@/actions/test-unit/get-test-unit";
 import { RichTextEditor } from "@/components/rich-text-editor/editor";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,6 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { tryCatch } from "@/utils/try-catch";
 import {
   testGroupFormSchema,
   TestGroupFormValuesType,
@@ -27,7 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon, ChevronsUpDownIcon, Loader, Save } from "lucide-react";
 import { Fragment, useState, useTransition } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { TestCategoryType, UnitType } from "./action";
+import { toast } from "sonner";
 import { UnitForm } from "./unit-form";
 
 interface TestGroupFormProps {
@@ -70,8 +74,21 @@ export function TestGroupForm({
     name: "testRows",
   });
 
-  function onSubmit(data: TestGroupFormValuesType) {
-    console.log(data);
+  function onSubmit(value: TestGroupFormValuesType) {
+    startTransition(async () => {
+      const { data: result, error } = await tryCatch(CreateTestGroup(value));
+
+      if (error) {
+        toast.error("An unexpected error occor please try again");
+      }
+
+      if (result?.status === "success") {
+        toast.success(result.message);
+        form.reset();
+      } else if (result?.status === "error") {
+        toast.error(result.message);
+      }
+    });
   }
 
   return (
