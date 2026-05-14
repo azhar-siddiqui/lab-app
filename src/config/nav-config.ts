@@ -46,10 +46,10 @@ export const navGroups: NavGroup[] = [
       },
       {
         title: "New Case",
-        url: "/dashboard/patients",
+        url: "/patients",
         icon: "add",
         isActive: false,
-        shortcut: ["i", "i"],
+        shortcut: ["ctr", "n"],
       },
     ],
   },

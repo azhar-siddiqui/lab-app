@@ -6,6 +6,7 @@ import {
   testGroupFormSchema,
   TestGroupFormValuesType,
 } from "@/validation/test-group";
+import { revalidatePath } from "next/cache";
 import { unauthorized } from "next/navigation";
 
 export async function CreateTestGroup(
@@ -50,6 +51,7 @@ export async function CreateTestGroup(
     },
   });
 
+  revalidatePath("/patients/new");
   return {
     status: "success",
     message: "Successfull",

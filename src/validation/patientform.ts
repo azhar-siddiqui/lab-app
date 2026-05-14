@@ -39,7 +39,7 @@ export const patientFormSchema = z.object({
 
   totalRs: z.number(),
   discount: z.number().min(0).max(100),
-  ammountRecived: z.number().min(0),
+  amountReceived: z.number().min(0),
   balance: z.number().min(0),
   remarks: z.string(),
 });
