@@ -33,6 +33,7 @@ import {
   Loader,
   UserRound,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface ResultFormProps {
@@ -40,6 +41,7 @@ interface ResultFormProps {
 }
 
 export function ResultForm({ report }: Readonly<ResultFormProps>) {
+  const router = useRouter();
   const [activeGroupId, setActiveGroupId] = useState(report.testGroups[0]?.id);
   const [pending, startTransition] = useTransition();
 
@@ -82,6 +84,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
 
       if (result?.status === "success") {
         toast.success(result.message);
+        router.push(`/patient-report/${report.id}/preview`);
       } else if (result?.status === "error") {
         toast.error(result.message);
       }
