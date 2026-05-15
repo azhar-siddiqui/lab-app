@@ -1,14 +1,27 @@
+"use client";
+import {
+  DoctorType,
+  PatientType,
+} from "@/actions/patient-report/get-patient-report";
 import { formatDateTime } from "@/lib/fomat-price";
 import { ReactQRCode } from "@lglab/react-qr-code";
 import { Activity, Calendar, Clipboard, ShieldCheck, User } from "lucide-react";
 
-export function PrintHeader() {
+interface PrintHeaderOneProps {
+  pataient: PatientType;
+  doctor: DoctorType;
+}
+
+export function PrintHeaderOne({
+  pataient,
+  doctor,
+}: Readonly<PrintHeaderOneProps>) {
   const labId = "LAB-2026-98765";
   const websiteUrl = `www.google.com`;
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white p-6 font-sans text-zinc-900 print:p-0">
+    <div className="w-full mx-auto bg-white p-4 font-sans text-zinc-900 print:p-0">
       {/* 1. Main Lab Branding Header */}
-      <div className="flex justify-between items-start border-b-2 border-zinc-800 pb-4">
+      <div className="flex justify-between items-start border-b border-zinc-800 pb-4">
         {/* Left Side: Lab Identity */}
         <div className="flex gap-4 items-center">
           {/* Logo Placeholder */}
@@ -21,7 +34,7 @@ export function PrintHeader() {
             </h1>
             <p className="text-xs text-zinc-500 font-medium mt-0.5 print:text-[11px]">
               Kabir Nager, Behind Central Bank Of India, Phulambri, Aurangabad -
-              431111 | Ph: +91 9011768487
+              431111. <br /> Ph: +91 9011768487 / 7558380826
             </p>
             <p className="text-xs text-zinc-500 font-medium print:text-[11px]">
               Email: medicarepathlogylab@gmail.com | Web: medicarelab.com
@@ -71,22 +84,26 @@ export function PrintHeader() {
             <span className="text-zinc-500 font-medium min-w-22.5">
               Patient Name:
             </span>
-            <span className="font-bold text-zinc-900">Mr. John Doe</span>
+            <span className="font-bold text-zinc-900">
+              {pataient.designation} {pataient.name}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-zinc-400 shrink-0" />
             <span className="text-zinc-500 font-medium min-w-22.5">
               Age / Gender:
             </span>
-            <span className="font-semibold">45 Y / Male</span>
+            <span className="font-semibold">
+              {`${pataient.age} ${pataient.ageType} / ${pataient.gender}`}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Clipboard className="h-4 w-4 text-zinc-400 shrink-0" />
             <span className="text-zinc-500 font-medium min-w-22.5">
               Patient ID (UHID):
             </span>
-            <span className="font-mono text-xs bg-zinc-200 px-1.5 py-0.5 rounded font-semibold print:bg-transparent print:p-0">
-              MED-88432
+            <span className="font-mono text-xs bg-zinc-200 px-1.5 py-0.5 rounded font-semibold print:bg-transparent print:p-0 uppercase">
+              MED-{pataient.id.split("-")[0]}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -95,7 +112,9 @@ export function PrintHeader() {
               Referred By:
             </span>
             <span className="font-semibold text-linear-to-r from-blue-800 to-blue-950  print:text-zinc-900">
-              Dr. A. K. Roy, MD
+              {doctor.name.toLowerCase() === "self"
+                ? doctor.name
+                : `Dr. ${doctor.name}`}
             </span>
           </div>
         </div>
@@ -107,7 +126,7 @@ export function PrintHeader() {
             <span className="text-zinc-500 font-medium min-w-30">
               Registered Date:
             </span>
-            <span className="font-medium">14-May-2026 09:30 AM</span>
+            <span className="font-medium">{formatDateTime(pataient.date)}</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />

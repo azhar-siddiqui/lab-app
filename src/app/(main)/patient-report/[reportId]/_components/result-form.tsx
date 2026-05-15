@@ -92,8 +92,9 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto  space-y-6">
+    // <div className="min-h-screen">
+    <div>
+      <div className="mx-auto space-y-4">
         <Card className="rounded-lg border-none shadow-sm">
           <CardContent>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -151,7 +152,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
           <Card className="rounded-lg border-none shadow-sm lg:sticky lg:top-6 lg:h-fit">
             <CardContent className="p-4">
               <div className="mb-4 flex items-center justify-between">
@@ -164,7 +165,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                 </Badge>
               </div>
 
-              <ScrollArea className="h-75 lg:h-[calc(100vh-220px)]">
+              <ScrollArea className="h-75 lg:h-[calc(100vh-380px)]">
                 <div className="space-y-3 pr-2">
                   {report.testGroups.map((group) => {
                     const isActive = group.id === activeGroupId;
@@ -212,7 +213,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
             <form
               id="patient-report-form"
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
+              className="space-y-4"
             >
               <Accordion
                 value={[activeGroup.id]}

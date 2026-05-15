@@ -28,7 +28,15 @@ export function serializeDecimal<T>(data: T): T {
  * Formats a Date object into 'DD-MMM-YYYY hh:mm AM/PM'
  * Example Output: 14-May-2026 09:30 AM
  */
-export function formatDateTime(date: Date): string {
+export function formatDateTime(dateInput: Date | string): string {
+  // Convert string to Date object, or keep it if it is already a Date
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+
+  // Handle invalid date strings safely
+  if (Number.isNaN(date.getTime())) {
+    return "Invalid Date";
+  }
+
   const day = date.getDate().toString().padStart(2, "0");
 
   // Get short month name (e.g., "May")

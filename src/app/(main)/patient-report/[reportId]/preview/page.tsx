@@ -10,7 +10,6 @@ export default async function PreviewReport({
 }: Readonly<PreviewReportProps>) {
   const { reportId } = await params;
   const report = await GetPatientReportById(reportId);
-
   return (
     <PageContainer>
       <PrintableReport report={report} />

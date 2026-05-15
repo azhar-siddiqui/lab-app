@@ -9,9 +9,6 @@ export default async function PatientReportPage({
 }>) {
   const { reportId } = await params;
   const report = await GetPatientReportById(reportId);
-
-  console.log("report", report);
-
   return (
     <PageContainer>
       <ResultForm report={report} />
