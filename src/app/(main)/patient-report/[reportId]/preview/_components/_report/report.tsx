@@ -1,4 +1,7 @@
-import { TestGroupItemType } from "@/actions/patient-report/get-patient-report";
+import {
+  PatientType,
+  TestGroupItemType,
+} from "@/actions/patient-report/get-patient-report";
 import {
   Table,
   TableBody,
@@ -7,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Gender } from "@/generated/prisma/enums";
 
 const TABLE_COLS = [
   { label: "Parameter", cls: "w-[40%] text-left" },
@@ -23,84 +27,10 @@ const ROW_CLS: Record<TestStatus, string> = {
   normal: "hover:bg-slate-50/60",
 };
 
-const parameters = [
-  {
-    name: "Haemoglobin",
-    abbr: "Hb",
-    value: 9.8,
-    unit: "g/dL",
-    low: 12.0,
-    high: 16.0,
-    precision: 1,
-    method: "Colorimetric",
-  },
-  {
-    name: "Total RBC Count",
-    abbr: "RBC",
-    value: 3.9,
-    unit: "×10⁶/µL",
-    low: 3.8,
-    high: 5.2,
-    precision: 2,
-  },
-  {
-    name: "Haematocrit (PCV)",
-    abbr: "HCT",
-    value: 32.4,
-    unit: "%",
-    low: 36.0,
-    high: 46.0,
-    precision: 1,
-  },
-  {
-    name: "Mean Corpuscular Volume",
-    abbr: "MCV",
-    value: 74.2,
-    unit: "fL",
-    low: 80.0,
-    high: 100.0,
-    precision: 1,
-  },
-  {
-    name: "MCH",
-    abbr: "MCH",
-    value: 24.1,
-    unit: "pg",
-    low: 27.0,
-    high: 33.0,
-    precision: 1,
-  },
-  {
-    name: "MCHC",
-    abbr: "MCHC",
-    value: 30.3,
-    unit: "g/dL",
-    low: 31.5,
-    high: 35.0,
-    precision: 1,
-  },
-  {
-    name: "RDW-CV",
-    abbr: "RDW",
-    value: 16.8,
-    unit: "%",
-    low: 11.5,
-    high: 14.5,
-    precision: 1,
-  },
-];
-
 function getStatus(value: number, low: number, high: number): TestStatus {
   if (value > high) return "high";
   if (value < low) return "low";
   return "normal";
-}
-
-function fmtVal(value: number, precision: number): string {
-  return value.toLocaleString("en-IN", {
-    minimumFractionDigits: precision,
-    maximumFractionDigits: precision,
-  });
 }
 
 const VALUE_CLS: Record<TestStatus, string> = {
@@ -109,11 +39,24 @@ const VALUE_CLS: Record<TestStatus, string> = {
   normal: "text-slate-800",
 };
 
-interface ReportProps {
-  testGroupItem: TestGroupItemType;
+function parseNormalRange(rangeStr: string): { low: number; high: number } {
+  if (!rangeStr) return { low: 0, high: 999999 };
+
+  const numbers = rangeStr.match(/\d+/g);
+  if (!numbers) return { low: 0, high: 999999 };
+
+  return {
+    low: Number.parseFloat(numbers[0]),
+    high: Number.parseFloat(numbers.at(-1) ?? "0"),
+  };
 }
 
-export function Report({ testGroupItem }: Readonly<ReportProps>) {
+interface ReportProps {
+  testGroupItem: TestGroupItemType;
+  pataient: PatientType;
+}
+
+export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
   return (
     <div className="mx-auto max-w-4xl bg-white text-zinc-900 p-4 pt-0">
       <div className="flex items-center justify-between">
@@ -145,54 +88,52 @@ export function Report({ testGroupItem }: Readonly<ReportProps>) {
         </TableHeader>
 
         <TableBody>
-          {parameters.map((param) => {
-            const status: TestStatus = getStatus(
-              param.value,
-              param.low,
-              param.high,
+          {testGroupItem.tests.map((item) => {
+            const test = item.test;
+            const resultValue = Number.parseFloat(item.resultValue ?? "");
+            const { low, high } = parseNormalRange(
+              test.normalValueMale || test.normalValueFemale || "",
             );
+            const status = getStatus(resultValue, low, high);
+            const unit = test.testUnit?.name || "";
 
             return (
               <TableRow
-                key={param.abbr}
-                className={`border-0 transition-colors  ${ROW_CLS[status]}`}
+                key={item.id}
+                className={`border-0 transition-colors ${ROW_CLS[status]}`}
               >
                 {/* Parameter name */}
-                <TableCell className="py-2.5 pl-5">
-                  <div className="flex items-center gap-2.5">
-                    <span className="items-center justify-center font-mono text-xs text-slate-500">
-                      {param.abbr}
+                <TableCell className="py-2 pl-5">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                      {test.name.slice(0, 2).toUpperCase()}
                     </span>
                     <div>
-                      <p className="text-[13px] font-medium text-slate-700">
-                        {param.name}
+                      <p className="text-[13.5px] font-medium text-slate-700">
+                        {test.name}
                       </p>
-                      {param.method && (
-                        <p className="text-[10.5px] text-slate-400">
-                          {param.method}
-                        </p>
-                      )}
+                      <p className="text-[10.5px] text-slate-400">Type</p>
                     </div>
                   </div>
                 </TableCell>
 
                 {/* Result */}
-                <TableCell className="py-2.5 pl-5 text-center">
+                <TableCell className="py-2 pl-5 text-center">
                   <span className={`font-mono text-sm ${VALUE_CLS[status]}`}>
-                    {fmtVal(param.value, param.precision)}
+                    {item.resultValue}
                   </span>
                 </TableCell>
 
                 {/* Unit */}
-                <TableCell className="py-2.5 text-center font-mono text-xs text-slate-500">
-                  {param.unit}
+                <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
+                  {unit}
                 </TableCell>
 
                 {/* Reference range */}
-                <TableCell className="py-2.5 text-center font-mono text-xs text-slate-500">
-                  {fmtVal(param.low, param.precision)}
-                  {" - "}
-                  {fmtVal(param.high, param.precision)}
+                <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
+                  {pataient.gender === Gender.Male
+                    ? test.normalValueMale
+                    : test.normalValueFemale}
                 </TableCell>
               </TableRow>
             );

@@ -146,7 +146,7 @@ export function PrintHeaderOne({
       </div>
 
       {/* 3. Decorative Divider */}
-      <div className="w-full h-px bg-zinc-200 mt-4 print:mt-3"></div>
+      <div className="w-full h-px bg-zinc-200 mt-4 print:mt-3" />
     </div>
   );
 }
