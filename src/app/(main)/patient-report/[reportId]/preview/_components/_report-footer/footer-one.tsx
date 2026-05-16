@@ -1,6 +1,11 @@
 import { ReactQRCode } from "@lglab/react-qr-code";
 
-export function FooterOne() {
+interface FooterOneProps {
+  index: number;
+  length: number;
+}
+
+export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
   const websiteUrl = `www.google.com`;
   return (
     <div className="px-8 pb-2">
@@ -69,7 +74,9 @@ export function FooterOne() {
           <p>•</p>
           <p>Not to be reproduced without permission</p>
           <p>•</p>
-          <p>Page 1 of 1</p>
+          <p>
+            Page {index} of {length}
+          </p>
         </div>
       </div>
     </div>

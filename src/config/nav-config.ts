@@ -111,18 +111,6 @@ export const navGroups: NavGroup[] = [
             icon: "exclusive",
             shortcut: ["e", "e"],
           },
-          {
-            title: "Bussiness Analytics",
-            url: "/dashboard/business/analytics",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
-          {
-            title: "Data Export",
-            url: "/dashboard/business/data-export",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
         ],
       },
       {
@@ -144,32 +132,14 @@ export const navGroups: NavGroup[] = [
             shortcut: ["e", "e"],
           },
           {
-            title: "CT Scan",
-            url: "/dashboard/ct-scan",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
-          {
             title: "Patients",
-            url: "/dashboard/patients",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
-          {
-            title: "Transitions",
-            url: "/dashboard/transitions",
+            url: "/patients",
             icon: "exclusive",
             shortcut: ["e", "e"],
           },
           {
             title: "Referral Doctors",
             url: "/dashboard/referral-doctors",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
-          {
-            title: "Agents",
-            url: "/dashboard/agents",
             icon: "exclusive",
             shortcut: ["e", "e"],
           },
@@ -181,18 +151,6 @@ export const navGroups: NavGroup[] = [
         icon: "microscope",
         isActive: true,
         items: [
-          {
-            title: "Today's Reports",
-            url: "/dashboard/todays-reports",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
-          {
-            title: "Search Reports",
-            url: "/dashboard/search-reports",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
           {
             title: "Test Packages",
             url: "/dashboard/test-packages",
@@ -207,19 +165,7 @@ export const navGroups: NavGroup[] = [
           },
           {
             title: "Test Data",
-            url: "/dashboard/test-data",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
-          {
-            title: "Interpretation",
-            url: "/dashboard/interpretation",
-            icon: "exclusive",
-            shortcut: ["e", "e"],
-          },
-          {
-            title: "Test Count",
-            url: "/dashboard/test-count",
+            url: "/test",
             icon: "exclusive",
             shortcut: ["e", "e"],
           },
@@ -233,22 +179,9 @@ export const navGroups: NavGroup[] = [
         items: [
           {
             title: "Profile",
-            url: "/dashboard/profile",
+            url: "/profile",
             icon: "profile",
             shortcut: ["m", "m"],
-          },
-          {
-            title: "Notifications",
-            url: "/dashboard/notifications",
-            icon: "notification",
-            shortcut: ["n", "n"],
-          },
-          {
-            title: "Billing",
-            url: "/dashboard/billing",
-            icon: "billing",
-            shortcut: ["b", "b"],
-            access: { requireOrg: true },
           },
         ],
       },

@@ -92,6 +92,7 @@ export default function PrintableReport({
                 id="terms-checkbox-basic"
                 name="terms-checkbox-basic"
                 className="border border-primary"
+                checked
               />
               <FieldLabel htmlFor="terms-checkbox-basic">
                 Page Break Between Test Group
@@ -127,7 +128,7 @@ export default function PrintableReport({
                 />
                 <Report testGroupItem={group} pataient={report.patient} />
               </div>
-              <FooterOne />
+              <FooterOne index={index + 1} length={printableGroups.length} />
             </div>
           ))}
         </div>
