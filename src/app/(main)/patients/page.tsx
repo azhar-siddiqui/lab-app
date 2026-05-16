@@ -1,9 +1,13 @@
+import { GetPatientReports } from "@/actions/patient-report/get-all-patient-report";
 import PageContainer from "@/components/layout/page-container";
 import { buttonVariants } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { columns } from "./_components/colums";
+import { DataTable } from "./_components/data-table";
 
-export default function PatientsPage() {
+export default async function PatientsPage() {
+  const reports = await GetPatientReports();
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-2">
@@ -25,7 +29,9 @@ export default function PatientsPage() {
           reports.
         </p>
 
-        <div>Patient Data Page</div>
+        <div>
+          <DataTable columns={columns} data={reports} />
+        </div>
       </div>
     </PageContainer>
   );

@@ -62,7 +62,7 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-bold  text-slate-400 mb-0.5">
-            Haematology Report
+            {testGroupItem.testGroup.testCategory.name}
           </p>
           <h2 className="text-sm font-bold text-slate-900">
             {`${testGroupItem.testGroup.name} (${testGroupItem.testGroup.shortName})`}
