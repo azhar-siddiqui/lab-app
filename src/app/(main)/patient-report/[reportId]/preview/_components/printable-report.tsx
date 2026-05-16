@@ -1,5 +1,10 @@
 "use client";
+
+import { useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+
 import { GetPatientReportByIdType } from "@/actions/patient-report/get-patient-report";
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldContent,
@@ -8,7 +13,13 @@ import {
 } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { PrinterIcon } from "lucide-react";
+import { FooterOne } from "./_report-footer/footer-one";
 import { PrintHeaderOne } from "./_report-header/print-header-one";
 import { Report } from "./_report/report";
 
@@ -19,6 +30,8 @@ interface PrintableReportProps {
 export default function PrintableReport({
   report,
 }: Readonly<PrintableReportProps>) {
+  const reportRef = useRef<HTMLDivElement>(null);
+
   const [selectedTestGroup, setSelectedTestGroup] = useState(
     report.testGroups[0],
   );
@@ -29,6 +42,11 @@ export default function PrintableReport({
       setSelectedTestGroup(group);
     }
   };
+
+  const handlePrint = useReactToPrint({
+    contentRef: reportRef,
+    documentTitle: `${report.patient.name}-${report.patientId}`,
+  });
 
   return (
     <div className="gap-4 flex">
@@ -55,26 +73,38 @@ export default function PrintableReport({
         </ScrollArea>
       </div>
 
-      <div className="order-2 col-span-8 w-full max-w-[210mm]">
-        <div className="border h-[297mm] w-[210mm] ms-auto bg-white shadow-lg">
-          <PrintHeaderOne pataient={report.patient} doctor={report.doctor} />
-          <Report testGroupItem={selectedTestGroup} pataient={report.patient} />
+      <div className="order-2 col-span-8 w-full max-w-[210mm] relative">
+        <div className="w-full bg-muted flex flex-wrap gap-1 items-center justify-end p-4">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Download report"
+                  variant="ghost"
+                  type="button"
+                  onClick={handlePrint}
+                >
+                  <PrinterIcon />
+                </Button>
+              }
+            />
+            <TooltipContent>Print Report</TooltipContent>
+          </Tooltip>
+        </div>
+        <div
+          ref={reportRef}
+          className="h-[297mm] w-[210mm] ms-auto bg-white shadow-lg flex flex-col"
+        >
+          <div className="flex-1">
+            <PrintHeaderOne pataient={report.patient} doctor={report.doctor} />
+            <Report
+              testGroupItem={selectedTestGroup}
+              pataient={report.patient}
+            />
+          </div>
+          <FooterOne />
         </div>
       </div>
     </div>
   );
 }
-
-/* 
-  <div className="grid gap-4 grid-cols-1 lg:grid-cols-12">
-      <div className="lg:sticky lg:top-20 h-[calc(100vh-100px)] order-1 col-span-4 border">
-        List her
-      </div>
-      <div className="order-2 col-span-8 ">
-        <div className="border h-[297mm] w-[210mm] ms-auto bg-white shadow-lg">
-          <PrintHeaderOne pataient={report.patient} doctor={report.doctor} />
-          <Report />
-        </div>
-      </div>
-    </div>
-*/

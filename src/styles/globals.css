@@ -111,3 +111,16 @@
     @apply appearance-none;
   }
 }
+
+@media print {
+  .print-rounded {
+    border-radius: 0.25rem !important; /* Adjust value */
+    -webkit-print-color-adjust: exact !important; /* Chrome/Safari/Edge */
+    print-color-adjust: exact !important; /* Firefox */
+  }
+  .print-rounded-lg {
+    border-radius: 0.45rem !important; /* Adjust value */
+    -webkit-print-color-adjust: exact !important; /* Chrome/Safari/Edge */
+    print-color-adjust: exact !important; /* Firefox */
+  }
+}

@@ -92,7 +92,6 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   }
 
   return (
-    // <div className="min-h-screen">
     <div>
       <div className="mx-auto space-y-4">
         <Card className="rounded-lg border-none shadow-sm">

@@ -22,9 +22,9 @@ const TABLE_COLS = [
 type TestStatus = "high" | "low" | "normal";
 
 const ROW_CLS: Record<TestStatus, string> = {
-  high: "bg-red-50/40 hover:bg-red-50/60",
-  low: "bg-orange-50/40 hover:bg-orange-50/60",
-  normal: "hover:bg-slate-50/60",
+  high: "bg-red-50 hover:bg-red-50",
+  low: "bg-orange-50 hover:bg-orange-50",
+  normal: "hover:bg-slate-50",
 };
 
 function getStatus(value: number, low: number, high: number): TestStatus {
@@ -58,7 +58,7 @@ interface ReportProps {
 
 export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
   return (
-    <div className="mx-auto max-w-4xl bg-white text-zinc-900 p-4 pt-0">
+    <div className="mx-auto max-w-4xl bg-white text-zinc-900 py-4 px-8 pt-0">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-bold  text-slate-400 mb-0.5">
@@ -68,18 +68,18 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
             {`${testGroupItem.testGroup.name} (${testGroupItem.testGroup.shortName})`}
           </h2>
         </div>
-        <p className="font-mono text-[11.5px] rounded-md border border-slate-200 bg-white px-3 py-1 text-slate-500">
+        <p className="font-mono text-xs rounded print-rounded border border-slate-200 bg-white px-3 py-1 text-slate-500">
           RPT-CBC-2026-00421
         </p>
       </div>
       <SectionDivider label="Investigation Results" />
       <Table>
         <TableHeader>
-          <TableRow className="bg-slate-50 hover:bg-slate-50 border-b-slate-200">
+          <TableRow className="bg-slate-50 print:bg-slate-100  hover:bg-slate-50 border-b-slate-200">
             {TABLE_COLS.map(({ label, cls }) => (
               <TableHead
                 key={label}
-                className={`py-2 text-[10.5px] font-bold uppercase tracking-widest text-slate-400 ${cls}`}
+                className={`py-2 text-[10.5px] font-bold uppercase tracking-widest text-slate-400 print:text-slate-800 ${cls}`}
               >
                 {label}
               </TableHead>
@@ -105,7 +105,7 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
                 {/* Parameter name */}
                 <TableCell className="py-2 pl-5">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="font-mono text-xs text-slate-500 bg-slate-100 print:bg-slate-200 px-1.5 py-0.5 rounded print-rounded">
                       {test.name.slice(0, 2).toUpperCase()}
                     </span>
                     <div>
