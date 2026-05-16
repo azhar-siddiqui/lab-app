@@ -114,11 +114,11 @@ export default function PrintableReport({
             <TooltipContent>Print Report</TooltipContent>
           </Tooltip>
         </div>
-        <div ref={reportRef} className="bg-muted">
+        <div ref={reportRef} className="flex flex-col gap-y-4">
           {printableGroups.map((group, index) => (
             <div
               key={group.id}
-              className=" bg-white w-[210mm] min-h-[297mm] mx-auto shadow flex flex-col print:shadow-none break-after-page "
+              className=" bg-white w-[210mm] min-h-[297mm] mx-auto shadow flex flex-col print:shadow-none break-after-page"
             >
               <div className="flex-1">
                 <PrintHeaderOne
