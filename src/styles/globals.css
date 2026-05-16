@@ -124,3 +124,21 @@
     print-color-adjust: exact !important; /* Firefox */
   }
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+  body {
+    background: white;
+  }
+  .break-after-page {
+    page-break-after: always;
+    break-after: page;
+  }
+  .break-after-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+}
