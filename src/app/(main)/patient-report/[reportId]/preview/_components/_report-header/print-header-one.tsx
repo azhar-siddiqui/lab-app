@@ -1,10 +1,9 @@
-"use client";
 import {
   DoctorType,
   PatientType,
 } from "@/actions/patient-report/get-patient-report";
 import { formatDateTime } from "@/lib/fomat-price";
-import { ReactQRCode } from "@lglab/react-qr-code";
+import { generateDeterministicBarcodePattern } from "@/utils/helpers";
 import { Activity, Calendar, Clipboard, ShieldCheck, User } from "lucide-react";
 
 interface PrintHeaderOneProps {
@@ -17,11 +16,10 @@ export function PrintHeaderOne({
   doctor,
 }: Readonly<PrintHeaderOneProps>) {
   const labId = "LAB-2026-98765";
-  const websiteUrl = `www.google.com`;
   return (
     <div className="w-full mx-auto bg-white py-4 px-6 pt-6 font-sans text-zinc-900">
       {/* 1. Main Lab Branding Header */}
-      <div className="flex justify-between items-start border-b border-zinc-800 pb-4">
+      <div className="flex justify-between items-start border-b border-zinc-200 pb-2">
         {/* Left Side: Lab Identity */}
         <div className="flex gap-4 items-center">
           {/* Logo Placeholder */}
@@ -43,7 +41,7 @@ export function PrintHeaderOne({
         </div>
 
         {/* Right Side: Accreditations & Dynamic QR Code */}
-        <div className="flex items-start gap-4 print:gap-0">
+        <div className="flex flex-col gap-2 select-none">
           <div className="text-right flex flex-col items-end gap-1">
             <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-200">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
@@ -54,31 +52,15 @@ export function PrintHeaderOne({
             </span>
           </div>
 
-          {/* Dynamic QR Code Box */}
-          <div className="flex flex-col items-center gap-1 bg-white">
-            <div className="w-18 h-16">
-              <ReactQRCode
-                size={72}
-                value={websiteUrl}
-                finderPatternInnerSettings={{
-                  style: "rounded-sm",
-                }}
-                finderPatternOuterSettings={{
-                  style: "rounded-sm",
-                }}
-              />
-            </div>
-            <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider">
-              Scan for Report
-            </span>
-          </div>
+          {/* Dynamic BarCode Box */}
+          <PatientBarcode id={pataient.id} />
         </div>
       </div>
 
       {/* 2. Patient & Sample Demographics Grid */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 bg-zinc-50 p-4 rounded-lg border border-zinc-200 text-sm print-rounded-lg">
         {/* Column 1: Patient Information */}
-        <div className="space-y-2 border-zinc-200 pb-2 md:pb-0 border-r  print:border-r md:pr-4">
+        <div className="space-y-2 border-zinc-200 pb-2">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-zinc-400 shrink-0" />
             <span className="text-zinc-500 font-medium min-w-22.5">
@@ -147,6 +129,34 @@ export function PrintHeaderOne({
 
       {/* 3. Decorative Divider */}
       <div className="w-full h-px bg-zinc-200 mt-4" />
+    </div>
+  );
+}
+
+interface PatientBarcodeProps {
+  id: string;
+}
+export function PatientBarcode({ id }: Readonly<PatientBarcodeProps>) {
+  // A mock array of widths to simulate a realistic barcode pattern
+  const barcodePattern = generateDeterministicBarcodePattern(id);
+
+  return (
+    <div className="flex flex-col items-center w-fit select-none">
+      {/* Barcode Lines Container */}
+      <div className="h-7 w-full flex items-end justify-center gap-0.5">
+        {barcodePattern.map((width, index) => (
+          <div
+            key={index}
+            className="h-full bg-black"
+            style={{ width: `${width}px` }}
+          />
+        ))}
+      </div>
+
+      {/* Human Readable Text */}
+      <span className="mt-1 text-[8px] font-mono font-bold text-zinc-600 uppercase tracking-[0.15em]">
+        *{id.split("-").slice(-2).join("-")}*
+      </span>
     </div>
   );
 }

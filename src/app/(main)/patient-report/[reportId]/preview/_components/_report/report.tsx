@@ -57,6 +57,7 @@ interface ReportProps {
 }
 
 export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
+  const textGroupId = testGroupItem.id.split("-")[0];
   return (
     <div className="mx-auto max-w-4xl bg-white text-zinc-900 py-4 px-8 pt-0">
       <div className="flex items-center justify-between">
@@ -68,8 +69,8 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
             {`${testGroupItem.testGroup.name} (${testGroupItem.testGroup.shortName})`}
           </h2>
         </div>
-        <p className="font-mono text-xs rounded print-rounded border border-slate-200 bg-white px-3 py-1 text-slate-500">
-          RPT-CBC-2026-00421
+        <p className="font-mono text-[9px] rounded print-rounded border border-slate-200 px-2 py-1 text-slate-500 uppercase select-none">
+          {`RPT-${testGroupItem.testGroup.shortName}-2026-${textGroupId}`}
         </p>
       </div>
       <SectionDivider label="Investigation Results" />

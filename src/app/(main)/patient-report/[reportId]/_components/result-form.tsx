@@ -54,10 +54,14 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
       report.testGroups.flatMap((group) =>
         group.tests.map((test) => ({
           id: test.id,
-          resultValue: "",
+          resultValue: test.resultValue ?? "",
         })),
       ),
     [],
+  );
+
+  const hasExistingResults = report.testGroups.some((group) =>
+    group.tests.some((test) => test.resultValue),
   );
 
   const form = useForm<ReportFormValues>({
@@ -113,7 +117,8 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                 </h1>
 
                 <p className="mt-2 text-sm text-muted-foreground md:text-base">
-                  Enter patient test results and continue section by section.
+                  {hasExistingResults ? "Update" : "Enter"} patient test results
+                  and continue section by section.
                 </p>
               </div>
 
@@ -182,7 +187,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h3 className="font-semibold">
+                            <h3 className="font-semibold capitalize">
                               {group.testGroup.name}
                             </h3>
 
@@ -236,12 +241,13 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                         </div>
 
                         <div>
-                          <h2 className="font-semibold">
+                          <h2 className="font-semibold capitalize">
                             {group.testGroup.name}
                           </h2>
 
                           <p className="text-sm text-muted-foreground">
-                            Enter patient test values.
+                            {hasExistingResults ? "Update" : "Enter"} Patient
+                            test result values.
                           </p>
                         </div>
                       </div>
@@ -330,7 +336,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                   ) : (
                     <>
                       <CheckCircle2 className="mr-2 size-5" />
-                      Save & Next
+                      {hasExistingResults ? "Update & Next" : "Save & Next"}
                     </>
                   )}
                 </Button>

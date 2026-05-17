@@ -59,8 +59,8 @@ export default function PrintableReport({
   });
 
   return (
-    <div className="gap-4 flex">
-      <div className="lg:sticky lg:top-20 h-[calc(100vh-100px)] order-1 col-span-4 border w-full">
+    <div className="gap-4 grid grid-cols-1 lg:grid-cols-12">
+      <div className="lg:sticky lg:top-20 h-[calc(100vh-100px)] order-1 col-span-3 border w-full">
         <ScrollArea className="h-[calc(100%-73px)] p-4">
           <FieldGroup className="w-full">
             {report.testGroups.map((group) => {
@@ -84,9 +84,9 @@ export default function PrintableReport({
         </ScrollArea>
       </div>
 
-      <div className="order-2 col-span-8 w-full max-w-[210mm] relative">
+      <div className="order-2 col-span-9 w-full max-w-[210mm] relative mx-auto">
         <div className="w-full bg-muted flex flex-wrap gap-1 items-center justify-between p-4">
-          <FieldGroup className="w-56">
+          <FieldGroup className="w-64">
             <Field orientation="horizontal">
               <Checkbox
                 id="terms-checkbox-basic"
@@ -119,7 +119,7 @@ export default function PrintableReport({
           {printableGroups.map((group, index) => (
             <div
               key={group.id}
-              className=" bg-white w-[210mm] min-h-[297mm] mx-auto shadow flex flex-col print:shadow-none break-after-page"
+              className="bg-white w-[210mm] min-h-[297mm] mx-auto shadow flex flex-col print:shadow-none break-after-page"
             >
               <div className="flex-1">
                 <PrintHeaderOne

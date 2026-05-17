@@ -14,7 +14,11 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Popover,
   PopoverContent,
@@ -30,7 +34,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Search } from "lucide-react";
 import React from "react";
 import { DateRange } from "react-day-picker";
 
@@ -81,16 +85,24 @@ export function DataTable<TData extends { reportDate: string }, TValue>({
   return (
     <div>
       <div className=" flex flex-col gap-3 p-4 px-0 lg:flex-row lg:items-center lg:justify-between ">
-        <Input
-          placeholder=" Search patient... "
-          value={
-            (table.getColumn("patient.name")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("patient.name")?.setFilterValue(event.target.value)
-          }
-          className=" w-full lg:max-w-sm "
-        />
+        <InputGroup className="w-full lg:max-w-sm">
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder="Search Patient Name"
+            value={
+              (table.getColumn("patient.name")?.getFilterValue() as string) ??
+              ""
+            }
+            onChange={(event) =>
+              table
+                .getColumn("patient.name")
+                ?.setFilterValue(event.target.value)
+            }
+          />
+        </InputGroup>
+
         <div className=" flex flex-wrap items-center gap-2 ">
           {/* DATE RANGE */}
           <Popover>
@@ -135,10 +147,8 @@ export function DataTable<TData extends { reportDate: string }, TValue>({
             variant="outline"
             type="button"
             onClick={() => {
-              /* CLEAR SEARCH */ table
-                .getColumn("patient.name")
-                ?.setFilterValue("");
-              /* CLEAR DATE */ setDateRange(undefined);
+              table.getColumn("patient.name")?.setFilterValue("");
+              setDateRange(undefined);
             }}
           >
             Clear

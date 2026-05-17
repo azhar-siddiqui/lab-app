@@ -6,11 +6,11 @@ import {
   ReportFormValues,
   reportSchema,
 } from "@/validation/patient-report-form";
+import { revalidatePath } from "next/cache";
 
 export async function SavePatientReport(
   values: ReportFormValues,
 ): Promise<ApiResponse> {
-  console.log("values", values);
   const validated = reportSchema.safeParse(values);
 
   if (!validated.success) {
@@ -29,7 +29,7 @@ export async function SavePatientReport(
       ),
     );
 
-    // revalidatePath(`/patient-report/${reportId}`);
+    revalidatePath(`/patients`);
     return { status: "success", message: "Report saved successfully" };
   } catch (error) {
     console.error(error);

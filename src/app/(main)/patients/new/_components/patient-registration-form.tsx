@@ -2,6 +2,8 @@
 
 import { DoctorType } from "@/actions/doctors/get-doctors";
 import { CreatePatient } from "@/actions/patient/create-patient";
+import { GetPatientByIdType } from "@/actions/patient/get-patient-by-id";
+import { UpdatePatient } from "@/actions/patient/update-patient";
 import { TestGroupType } from "@/actions/test-group/get-test-group";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -55,7 +57,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Age, Designation, Gender } from "@/generated/prisma/enums";
 import { getGenderIcon } from "@/lib/getGender";
-import { tryCatch } from "@/utils/try-catch";
 import {
   patientFormSchema,
   PatientFormValuesType,
@@ -78,11 +79,16 @@ import { DoctorForm } from "./doctor-form";
 interface PatientRegistrationFormProps {
   doctors: DoctorType[];
   testGroups: TestGroupType[];
+  patient?: GetPatientByIdType;
+  mode?: "create" | "edit";
 }
 export function PatientRegistrationForm({
   doctors,
   testGroups,
+  patient,
+  mode = "create",
 }: Readonly<PatientRegistrationFormProps>) {
+  console.log("patient==>", patient);
   const router = useRouter();
   const [open, setOpen] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition();
@@ -90,22 +96,25 @@ export function PatientRegistrationForm({
   const form = useForm<PatientFormValuesType>({
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
-      date: new Date(),
-      reference: "",
-      designation: Designation.Mr,
-      patientName: "",
-      phone: "",
-      gender: Gender.Male,
-      age: "",
-      ageType: Age.Year,
-      email: "",
-      address: "",
-      testGroupId: [],
-      totalRs: 0,
-      discount: 0,
-      amountReceived: 0,
-      balance: 0,
-      remarks: "",
+      date: patient?.date ? new Date(patient.date) : new Date(),
+      reference: patient?.reports?.[0]?.doctorId ?? "",
+      designation: patient?.designation ?? Designation.Mr,
+      patientName: patient?.name ?? "",
+      phone: patient?.contactNumber ?? "",
+      gender: patient?.gender ?? Gender.Male,
+      age: patient?.age ?? "",
+      ageType: patient?.ageType ?? Age.Year,
+      email: patient?.email ?? "",
+      address: patient?.address ?? "",
+      testGroupId:
+        patient?.reports?.[0]?.testGroups?.map((group) => ({
+          id: group.testGroupId,
+        })) ?? [],
+      totalRs: Number(patient?.totalRs) || 0,
+      discount: Number(patient?.discount) || 0,
+      amountReceived: Number(patient?.ammountRecived) || 0,
+      balance: Number(patient?.balance) || 0,
+      remarks: patient?.remarks ?? "",
     },
   });
 
@@ -125,21 +134,24 @@ export function PatientRegistrationForm({
 
   function onSubmit(formData: PatientFormValuesType) {
     startTransition(async () => {
-      const { data: result, error } = await tryCatch(CreatePatient(formData));
+      const response =
+        mode === "edit"
+          ? await UpdatePatient(patient!.id, formData)
+          : await CreatePatient(formData);
 
-      if (error) {
+      if (response.status === "error") {
         toast.error(
-          error.message ?? "An unexpected error occor please try again",
+          response.message ?? "An unexpected error occor please try again",
         );
       }
 
-      if (result?.status === "success") {
-        toast.success(result.message);
+      if (response.status === "success") {
+        toast.success(response.message);
         form.reset();
-        router.push(`/patient-report/${result.data?.reportId}`);
+        router.push(`/patient-report/${response.data?.reportId}`);
         setOpen(false);
-      } else if (result?.status === "error") {
-        toast.error(result.message);
+      } else if (response?.status === "error") {
+        toast.error(response.message);
       }
     });
 
@@ -691,8 +703,8 @@ export function PatientRegistrationForm({
           </>
         ) : (
           <>
-            Save & Next
-            <Save className="size-4" />
+            {mode === "edit" ? "Update Patient" : "Save & Next"}
+            <Save />
           </>
         )}
       </Button>
@@ -723,7 +735,7 @@ function TestGroupSelector({
         />
 
         <FieldContent>
-          <FieldTitle>{item.name}</FieldTitle>
+          <FieldTitle className="capitalize">{item.name}</FieldTitle>
 
           <FieldDescription>{item.testCategory.name}</FieldDescription>
         </FieldContent>

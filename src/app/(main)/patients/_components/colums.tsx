@@ -5,11 +5,20 @@ import Link from "next/link";
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import { ArrowUpDown, Eye, Printer } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 export const columns: ColumnDef<GetPatientReportsType>[] = [
@@ -19,7 +28,7 @@ export const columns: ColumnDef<GetPatientReportsType>[] = [
     cell: ({ row }) => {
       return (
         <span className="font-medium uppercase">
-          MED - {row.original.patientId.slice(0, 8)}
+          MED-{row.original.patientId.slice(0, 8)}
         </span>
       );
     },
@@ -130,27 +139,55 @@ export const columns: ColumnDef<GetPatientReportsType>[] = [
     cell: ({ row }) => {
       const report = row.original;
       return (
-        <div
-          className="
-            flex
-            items-center
-            gap-2
-          "
-        >
-          <Link
-            href={`/patient-report/${report.id}`}
-            className={cn({ buttonVariants: "ghost", size: "icon" })}
-          >
-            <Eye className="size-4" />
-          </Link>
-
-          <Link
-            href={`/patient-report/${report.id}/preview`}
-            className={cn({ buttonVariants: "ghost", size: "icon" })}
-          >
-            <Printer className="size-4" />
-          </Link>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent className="w-46" align="end">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                render={
+                  <Link
+                    href={`/patient-report/${report.id}`}
+                    className={cn({ buttonVariants: "ghost" })}
+                  >
+                    View & Update Report
+                  </Link>
+                }
+              />
+              <DropdownMenuItem
+                render={
+                  <Link
+                    href={`/patient-report/${report.id}/preview`}
+                    className={cn({ buttonVariants: "ghost" })}
+                  >
+                    Print & Download PDF
+                  </Link>
+                }
+              />
+              <DropdownMenuItem
+                render={
+                  <Link
+                    href={`/patients/${report.patientId}/edit`}
+                    className={cn({ buttonVariants: "ghost" })}
+                  >
+                    Edit Patient Details
+                  </Link>
+                }
+              />
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },
