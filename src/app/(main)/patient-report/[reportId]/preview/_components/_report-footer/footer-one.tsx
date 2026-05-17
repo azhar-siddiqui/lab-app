@@ -17,7 +17,7 @@ export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
           </div>
           <div>
             <p className="font-semibold text-zinc-800 text-sm">
-              Dr. A. K. Roy, MD
+              {/* Dr. A. K. Roy, MD */}
             </p>
             <p className="text-xs text-zinc-600">Consultant Pathologist</p>
           </div>
@@ -26,7 +26,7 @@ export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
         {/* Center - Lab Info & Disclaimer */}
         <div className="flex-1 text-center">
           <div className="flex justify-center mb-3">
-            <div className="h-px w-16 bg-linear-to-r from-transparent via-zinc-400 to-transparent" />
+            <div className="h-px w-56 bg-linear-to-r from-transparent via-zinc-400 to-transparent" />
           </div>
 
           <p className="text-xs uppercase tracking-widest text-zinc-500 font-medium">
@@ -39,7 +39,7 @@ export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
           </p>
           <div className="text-[10px] text-zinc-500 space-y-0.5 mt-2">
             <p>+91 90117 68487</p>
-            <p>medicarelab@gmail.com</p>
+            <p>medicarepathlogylab@gmail.com</p>
           </div>
         </div>
 
@@ -48,7 +48,7 @@ export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
           <div className="flex flex-col items-center gap-1 bg-white  p-1.5 border border-dashed border-zinc-400 rounded print-rounded">
             <div className="w-14 h-14">
               <ReactQRCode
-                size={56}
+                size={58}
                 value={websiteUrl}
                 finderPatternInnerSettings={{
                   style: "rounded-sm",
@@ -67,7 +67,7 @@ export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
 
       {/* Bottom Bar */}
       <div className="text-center mt-2">
-        <div className="flex items-center justify-center gap-6 text-[10px] text-zinc-400 print:text-zinc-400">
+        <div className="flex items-center justify-center gap-6 text-[10px] text-zinc-400 print:text-zinc-500">
           <p>Reg. No: MMC-45678</p>
           <p>•</p>
           <p>CONFIDENTIAL MEDICAL REPORT</p>

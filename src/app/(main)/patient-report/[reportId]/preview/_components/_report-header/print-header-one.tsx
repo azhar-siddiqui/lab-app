@@ -44,7 +44,7 @@ export function PrintHeaderOne({
         <div className="flex flex-col gap-2 select-none">
           <div className="text-right flex flex-col items-end gap-1">
             <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-200">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <ShieldCheck className="size-3 text-emerald-600" />
               <span>NABL ACCREDITED</span>
             </div>
             <span className="text-[10px] text-zinc-400 font-mono">
