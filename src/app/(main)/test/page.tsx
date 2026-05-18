@@ -1,9 +1,14 @@
+import { GetTestGroup } from "@/actions/test-group/get-test-group";
+import { DataTable } from "@/components/data-table/data-table";
 import PageContainer from "@/components/layout/page-container";
 import { buttonVariants } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { testGroupColumns } from "./_components/columns";
 
-export default function TestPage() {
+export default async function TestPage() {
+  const testGroups = await GetTestGroup();
+
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-2">
@@ -34,7 +39,13 @@ export default function TestPage() {
           reports.
         </p>
 
-        <div>TestDataPage</div>
+        <DataTable
+          data={testGroups}
+          columns={testGroupColumns}
+          searchKeys={["name", "shortName"]}
+          searchPlaceholder="Search Test Group"
+          dateFilterKey="createdAt"
+        />
       </div>
     </PageContainer>
   );

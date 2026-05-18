@@ -21,7 +21,7 @@ export async function CreateTestGroup(
   if (!result.success) {
     return {
       status: "error",
-      message: result.error.issues[0].message || "Invalid input data", // Return the first validation error
+      message: result.error.issues[0].message || "Invalid input data",
     };
   }
 
@@ -54,6 +54,6 @@ export async function CreateTestGroup(
   revalidatePath("/patients/new");
   return {
     status: "success",
-    message: "Successfull",
+    message: "Test Group Created Successfully",
   };
 }

@@ -6,7 +6,7 @@ interface FooterOneProps {
 }
 
 export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
-  const websiteUrl = `www.google.com`;
+  const websiteUrl = `https://medicare-lab-app.vercel.app/`;
   return (
     <div className="px-8 pb-2">
       <div className="flex flex-row justify-between items-start gap-8">

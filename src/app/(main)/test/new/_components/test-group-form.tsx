@@ -2,6 +2,8 @@
 
 import { TestCategoryType } from "@/actions/test-category/get-test-category";
 import { CreateTestGroup } from "@/actions/test-group/create-test-group";
+import { TestGroupByIdType } from "@/actions/test-group/get-test-group-by-id";
+import { UpdateTestGroup } from "@/actions/test-group/update-test-group";
 import { UnitType } from "@/actions/test-unit/get-test-unit";
 import { RichTextEditor } from "@/components/rich-text-editor/editor";
 import { Button } from "@/components/ui/button";
@@ -29,20 +31,26 @@ import {
 } from "@/validation/test-group";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon, ChevronsUpDownIcon, Loader, Save } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Fragment, useState, useTransition } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UnitForm } from "./unit-form";
 
 interface TestGroupFormProps {
+  mode?: "create" | "edit";
+  testGroup?: TestGroupByIdType;
   testCategories: TestCategoryType[];
   testUnit: UnitType[];
 }
 
 export function TestGroupForm({
+  mode,
+  testGroup,
   testCategories,
   testUnit,
 }: Readonly<TestGroupFormProps>) {
+  const router = useRouter();
   const [open, setOpen] = useState<boolean>(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -51,21 +59,32 @@ export function TestGroupForm({
   const form = useForm<TestGroupFormValuesType>({
     resolver: zodResolver(testGroupFormSchema),
     defaultValues: {
-      testGroupName: "",
-      shortName: "",
-      category: "",
-      price: "",
-      isOptionalTestGroupNameOnReport: false,
-      interpretation: "",
-      testRows: [
-        {
-          testName: "",
-          unit: "",
-          normalMale: "",
-          normalFemale: "",
-          optional: false,
-        },
-      ],
+      testGroupName: testGroup?.name ?? "",
+      shortName: testGroup?.shortName ?? "",
+      category: testGroup?.testCategoryId ?? "",
+      price: testGroup?.price.toString() || "",
+      isOptionalTestGroupNameOnReport:
+        testGroup?.isTestGroupNameVissibleOnReport ?? false,
+      interpretation: testGroup?.interpretation ?? "",
+      testRows:
+        mode === "edit" && testGroup?.tests.length
+          ? testGroup.tests.map((test) => ({
+              id: test.id,
+              testName: test.name,
+              unit: test.testUnitId,
+              normalMale: test.normalValueMale,
+              normalFemale: test.normalValueFemale,
+              optional: test.isOptionalTest,
+            }))
+          : [
+              {
+                testName: "",
+                unit: "",
+                normalMale: "",
+                normalFemale: "",
+                optional: false,
+              },
+            ],
     },
   });
 
@@ -76,18 +95,28 @@ export function TestGroupForm({
 
   function onSubmit(value: TestGroupFormValuesType) {
     startTransition(async () => {
-      const { data: result, error } = await tryCatch(CreateTestGroup(value));
+      if (mode === "edit") {
+        const response = await UpdateTestGroup(testGroup!.id, value);
+        if (response.status === "error") {
+          toast.error(response.message);
+          return;
+        }
+        toast.success(response.message);
+      } else {
+        const { data: result, error } = await tryCatch(CreateTestGroup(value));
 
-      if (error) {
-        toast.error("An unexpected error occor please try again");
-      }
+        if (error) {
+          toast.error("An unexpected error occor please try again");
+        }
 
-      if (result?.status === "success") {
-        toast.success(result.message);
-        form.reset();
-      } else if (result?.status === "error") {
-        toast.error(result.message);
+        if (result?.status === "success") {
+          toast.success(result.message);
+          form.reset();
+        } else if (result?.status === "error") {
+          toast.error(result.message);
+        }
       }
+      router.push("/test");
     });
   }
 
@@ -433,7 +462,7 @@ export function TestGroupForm({
           </>
         ) : (
           <>
-            Save & Next
+            {mode === "edit" ? "Update Test Group" : "Create Test Group"}
             <Save className="size-4" />
           </>
         )}

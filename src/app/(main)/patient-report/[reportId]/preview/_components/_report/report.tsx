@@ -15,7 +15,7 @@ import { Gender } from "@/generated/prisma/enums";
 const TABLE_COLS = [
   { label: "Parameter", cls: "w-[40%] text-left" },
   { label: "Result", cls: "w-[15%] text-center" },
-  { label: "Unit", cls: "w-[15%] text-center" },
+  { label: "Units", cls: "w-[15%] text-center" },
   { label: "Reference Range", cls: "w-[30%] text-center" },
 ] as const;
 
@@ -59,8 +59,8 @@ interface ReportProps {
 export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
   const textGroupId = testGroupItem.id.split("-")[0];
   return (
-    <div className="mx-auto max-w-4xl bg-white text-zinc-900 py-4 px-8 pt-0">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-4xl bg-white text-zinc-900 py-4 px-6 pt-0">
+      <div className="flex items-center justify-between pb-2">
         <div>
           <p className="text-xs font-bold  text-slate-400 mb-0.5">
             {testGroupItem.testGroup.testCategory.name}
@@ -73,7 +73,7 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
           {`RPT-${testGroupItem.testGroup.shortName}-2026-${textGroupId}`}
         </p>
       </div>
-      <SectionDivider label="Investigation Results" />
+      {/* <SectionDivider label="Investigation Results" /> */}
       <Table>
         <TableHeader>
           <TableRow className="bg-slate-50 print:bg-slate-100  hover:bg-slate-50 border-b-slate-200">
@@ -89,7 +89,7 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
         </TableHeader>
 
         <TableBody>
-          {testGroupItem.tests.map((item) => {
+          {testGroupItem.tests.map((item, index) => {
             const test = item.test;
             const resultValue = Number.parseFloat(item.resultValue ?? "");
             const { low, high } = parseNormalRange(
@@ -104,23 +104,22 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
                 className={`border-0 transition-colors ${ROW_CLS[status]}`}
               >
                 {/* Parameter name */}
-                <TableCell className="py-2 pl-5">
+                <TableCell className="py-2">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs text-slate-500 bg-slate-100 print:bg-slate-200 px-1.5 py-0.5 rounded print-rounded">
+                    <span className="font-mono text-[10px] text-slate-500 bg-slate-100 print:bg-slate-200 px-1.5 py-0.5 rounded print-rounded">
                       {test.name.slice(0, 2).toUpperCase()}
                     </span>
                     <div>
-                      <p className="text-[13.5px] font-medium text-slate-700">
+                      <p className="text-xs font-medium text-slate-700">
                         {test.name}
                       </p>
-                      <p className="text-[10.5px] text-slate-400">Type</p>
                     </div>
                   </div>
                 </TableCell>
 
                 {/* Result */}
-                <TableCell className="py-2 pl-5 text-center">
-                  <span className={`font-mono text-sm ${VALUE_CLS[status]}`}>
+                <TableCell className="py-2 text-center">
+                  <span className={`font-mono text-xs ${VALUE_CLS[status]}`}>
                     {item.resultValue}
                   </span>
                 </TableCell>
@@ -141,15 +140,16 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
           })}
         </TableBody>
       </Table>
+      <SectionDivider label="End Of Report" />
     </div>
   );
 }
 
 function SectionDivider({ label }: Readonly<{ label: string }>) {
   return (
-    <div className="flex items-center gap-3 mb-2">
+    <div className="flex items-center gap-3 py-4">
       <div className="h-px flex-1 bg-slate-200" />
-      <span className="px-1 text-sm">{label}</span>
+      <span className="px-1 text-xs text-slate-400">{label}</span>
       <div className="h-px flex-1 bg-slate-200" />
     </div>
   );

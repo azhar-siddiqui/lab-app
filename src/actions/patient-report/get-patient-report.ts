@@ -23,7 +23,14 @@ export async function GetPatientReportById(reportId: string) {
           testGroup: {
             include: { testCategory: true },
           },
-          tests: { include: { test: { include: { testUnit: true } } } },
+          tests: {
+            orderBy: {
+              test: {
+                position: "asc",
+              },
+            },
+            include: { test: { include: { testUnit: true } } },
+          },
         },
       },
     },

@@ -4,7 +4,14 @@ import {
 } from "@/actions/patient-report/get-patient-report";
 import { formatDateTime } from "@/lib/fomat-price";
 import { generateDeterministicBarcodePattern } from "@/utils/helpers";
-import { Activity, Calendar, Clipboard, ShieldCheck, User } from "lucide-react";
+import {
+  Activity,
+  Calendar,
+  Clipboard,
+  Hospital,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 
 interface PrintHeaderOneProps {
   pataient: PatientType;
@@ -17,9 +24,9 @@ export function PrintHeaderOne({
 }: Readonly<PrintHeaderOneProps>) {
   const labId = "LAB-2026-98765";
   return (
-    <div className="w-full mx-auto bg-white py-4 px-6 pt-6 font-sans text-zinc-900">
+    <div className="w-full mx-auto bg-white px-6 pt-6 pb-2 font-sans text-zinc-900">
       {/* 1. Main Lab Branding Header */}
-      <div className="flex justify-between items-start border-b border-zinc-200 pb-2">
+      <div className="flex justify-between items-start">
         {/* Left Side: Lab Identity */}
         <div className="flex gap-4 items-center">
           {/* Logo Placeholder */}
@@ -58,7 +65,7 @@ export function PrintHeaderOne({
       </div>
 
       {/* 2. Patient & Sample Demographics Grid */}
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 bg-zinc-50 p-4 rounded-lg border border-zinc-200 text-sm print-rounded-lg">
+      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 bg-zinc-50 p-4 rounded-lg border border-zinc-200 text-sm print-rounded-lg">
         {/* Column 1: Patient Information */}
         <div className="space-y-2 border-zinc-200 pb-2">
           <div className="flex items-center gap-2">
@@ -80,16 +87,7 @@ export function PrintHeaderOne({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Clipboard className="h-4 w-4 text-zinc-400 shrink-0" />
-            <span className="text-zinc-500 font-medium min-w-22.5">
-              Patient ID (UHID):
-            </span>
-            <span className="font-mono text-xs bg-zinc-200 px-1.5 py-0.5 rounded font-semibold uppercase">
-              MED-{pataient.id.split("-")[0]}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4"></span>
+            <Hospital className="h-4 w-4 text-zinc-400 shrink-0" />
             <span className="text-zinc-500 font-medium min-w-22.5">
               Referred By:
             </span>
@@ -118,17 +116,26 @@ export function PrintHeaderOne({
             <span className="font-medium">{formatDateTime(new Date())}</span>
           </div>
           <div className="flex items-center gap-2">
+            <Clipboard className="h-4 w-4 text-zinc-400 shrink-0" />
+            <span className="text-zinc-500 font-medium min-w-22.5">
+              Patient ID (UHID):
+            </span>
+            <span className="font-mono text-xs bg-zinc-200 px-1.5 py-0.5 rounded font-semibold uppercase">
+              MED-{pataient.id.split("-")[0]}
+            </span>
+          </div>
+          {/* <div className="flex items-center gap-2">
             <span className="w-4"></span>
             <span className="text-zinc-500 font-medium min-w-30">
               Lab Accession No:
             </span>
             <span className="font-mono font-bold text-xs">{labId}</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* 3. Decorative Divider */}
-      <div className="w-full h-px bg-zinc-200 mt-4" />
+      {/* <div className="w-full h-px bg-zinc-200 mt-4" /> */}
     </div>
   );
 }

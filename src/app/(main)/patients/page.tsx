@@ -1,10 +1,10 @@
 import { GetPatientReports } from "@/actions/patient-report/get-all-patient-report";
+import { DataTable } from "@/components/data-table/data-table";
 import PageContainer from "@/components/layout/page-container";
 import { buttonVariants } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./_components/colums";
-import { DataTable } from "./_components/data-table";
 
 export default async function PatientsPage() {
   const reports = await GetPatientReports();
@@ -29,9 +29,13 @@ export default async function PatientsPage() {
           reports.
         </p>
 
-        <div>
-          <DataTable columns={columns} data={reports} />
-        </div>
+        <DataTable
+          data={reports}
+          columns={columns}
+          searchKeys={["patient.name"]}
+          searchPlaceholder="Search patient..."
+          dateFilterKey="reportDate"
+        />
       </div>
     </PageContainer>
   );

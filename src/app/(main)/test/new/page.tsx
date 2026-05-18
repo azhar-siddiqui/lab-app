@@ -4,8 +4,10 @@ import PageContainer from "@/components/layout/page-container";
 import { TestGroupForm } from "./_components/test-group-form";
 
 export default async function NewTestGroupPage() {
-  const testCategories = await GetTestCategory();
-  const testUnit = await GetAllUnit();
+  const [testCategories, testUnit] = await Promise.all([
+    GetTestCategory(),
+    GetAllUnit(),
+  ]);
 
   return (
     <PageContainer>

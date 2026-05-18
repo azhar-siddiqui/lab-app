@@ -10,21 +10,19 @@ export const testGroupFormSchema = z.object({
     .trim(),
   isOptionalTestGroupNameOnReport: z.boolean().optional(),
   interpretation: z.string().trim(),
+  description: z.string().trim().optional(),
   testRows: z
     .array(
       z.object({
+        id: z.string().optional(),
         testName: z.string().min(1, { message: "Test name required" }),
-
         unit: z.string().min(1),
-
         normalMale: z
           .string()
           .min(1, { message: "Enter valid range (e.g. 10-20)" }),
-
         normalFemale: z
           .string()
           .min(1, { message: "Enter valid range (e.g. 10-20)" }),
-
         optional: z.boolean().optional(),
       }),
     )

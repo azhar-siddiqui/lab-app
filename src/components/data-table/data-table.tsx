@@ -41,30 +41,92 @@ import { DateRange } from "react-day-picker";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  searchKeys?: string[];
+  searchPlaceholder?: string;
+  dateFilterKey?: keyof TData;
 }
 
-export function DataTable<TData extends { reportDate: string }, TValue>({
+function getNestedValue(obj: unknown, path: string) {
+  return path.split(".").reduce<unknown>((acc, part) => {
+    if (typeof acc === "object" && acc !== null && part in acc) {
+      return (acc as Record<string, unknown>)[part];
+    }
+    return undefined;
+  }, obj);
+}
+
+function toSearchableString(value: unknown) {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  return "";
+}
+
+export function DataTable<TData, TValue>({
   columns,
   data,
+  searchKeys,
+  searchPlaceholder,
+  dateFilterKey,
 }: Readonly<DataTableProps<TData, TValue>>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
+  const [search, setSearch] = React.useState("");
 
   const filteredData = React.useMemo(() => {
-    if (!dateRange?.from) {
-      return data;
+    let filtered = [...data];
+
+    if (search && searchKeys?.length) {
+      filtered = filtered.filter((item) => {
+        return searchKeys.some((key) => {
+          const value = getNestedValue(item, key);
+
+          if (!value) {
+            return false;
+          }
+
+          return toSearchableString(value)
+            .toLowerCase()
+            .includes(search.toLowerCase());
+        });
+      });
     }
-    const from = new Date(dateRange.from);
-    const to = dateRange.to ? new Date(dateRange.to) : from;
-    to.setHours(23, 59, 59, 999);
-    return data.filter((item) => {
-      const reportDate = new Date(item.reportDate);
-      return reportDate >= from && reportDate <= to;
-    });
-  }, [data, dateRange]);
+
+    if (dateRange?.from && dateFilterKey) {
+      const from = new Date(dateRange.from);
+
+      const to = dateRange.to ? new Date(dateRange.to) : from;
+
+      to.setHours(23, 59, 59, 999);
+
+      filtered = filtered.filter((item) => {
+        const value = getNestedValue(item, String(dateFilterKey));
+        if (!value) {
+          return false;
+        }
+        const dateValue = toSearchableString(value);
+
+        if (!dateValue) {
+          return false;
+        }
+
+        const itemDate = new Date(dateValue);
+        return itemDate >= from && itemDate <= to;
+      });
+    }
+
+    return filtered;
+  }, [data, search, searchKeys, dateRange, dateFilterKey]);
 
   const table = useReactTable({
     data: filteredData,
@@ -85,23 +147,18 @@ export function DataTable<TData extends { reportDate: string }, TValue>({
   return (
     <div>
       <div className=" flex flex-col gap-3 p-4 px-0 lg:flex-row lg:items-center lg:justify-between ">
-        <InputGroup className="w-full lg:max-w-sm">
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-          <InputGroupInput
-            placeholder="Search Patient Name"
-            value={
-              (table.getColumn("patient.name")?.getFilterValue() as string) ??
-              ""
-            }
-            onChange={(event) =>
-              table
-                .getColumn("patient.name")
-                ?.setFilterValue(event.target.value)
-            }
-          />
-        </InputGroup>
+        {!!searchKeys?.length && (
+          <InputGroup className=" w-full lg:max-w-sm ">
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+            <InputGroupInput
+              placeholder={searchPlaceholder ?? "Search"}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </InputGroup>
+        )}
 
         <div className=" flex flex-wrap items-center gap-2 ">
           {/* DATE RANGE */}
@@ -147,7 +204,7 @@ export function DataTable<TData extends { reportDate: string }, TValue>({
             variant="outline"
             type="button"
             onClick={() => {
-              table.getColumn("patient.name")?.setFilterValue("");
+              setSearch("");
               setDateRange(undefined);
             }}
           >
