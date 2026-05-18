@@ -32,7 +32,6 @@ export default function PrintableReport({
   report,
 }: Readonly<PrintableReportProps>) {
   const reportRef = useRef<HTMLDivElement>(null);
-  console.log("report", report);
   const [selectedTestGroups, setSelectedTestGroups] = useState<string[]>([
     report.testGroups[0]?.id,
   ]);
@@ -59,8 +58,8 @@ export default function PrintableReport({
   });
 
   return (
-    <div className="gap-4 grid grid-cols-1 lg:grid-cols-12">
-      <div className="lg:sticky lg:top-20 h-[calc(100vh-100px)] order-1 col-span-4 border w-full">
+    <div className="gap-4 flex flex-col lg:flex-row">
+      <div className="lg:sticky lg:top-20 h-[calc(100vh-100px)] order-1 border w-full">
         <ScrollArea className="h-[calc(100%-73px)] p-4">
           <FieldGroup className="w-full">
             {report.testGroups.map((group) => {
@@ -84,7 +83,7 @@ export default function PrintableReport({
         </ScrollArea>
       </div>
 
-      <div className="order-2 col-span-8 w-full max-w-[210mm] relative mx-auto">
+      <div className="order-2 w-full max-w-[210mm] relative flex-1 mx-auto">
         <div className="w-full bg-muted flex flex-wrap gap-1 items-center justify-between p-4">
           <FieldGroup className="w-64">
             <Field orientation="horizontal">
@@ -115,7 +114,7 @@ export default function PrintableReport({
             <TooltipContent>Print Report</TooltipContent>
           </Tooltip>
         </div>
-        <div ref={reportRef} className="flex flex-col gap-y-4">
+        <div ref={reportRef} className="flex flex-col gap-y-4 overflow-x-auto">
           {printableGroups.map((group, index) => (
             <div
               key={group.id}

@@ -22,7 +22,11 @@ export async function GetTestGroupById(testGroupId: string) {
     },
 
     include: {
-      tests: true,
+      tests: {
+        orderBy: {
+          position: "asc",
+        },
+      },
     },
   });
 

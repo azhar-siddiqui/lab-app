@@ -42,7 +42,7 @@ export const testGroupColumns: ColumnDef<TestGroupType>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Test Group Name
+          Group Name
           <ArrowUpDown
             className="
               ml-2
@@ -73,7 +73,7 @@ export const testGroupColumns: ColumnDef<TestGroupType>[] = [
   },
   {
     accessorKey: "shortName",
-    header: "Test Groups Short Name",
+    header: "Short Name",
     cell: ({ row }) => {
       const group = row.original;
       return (

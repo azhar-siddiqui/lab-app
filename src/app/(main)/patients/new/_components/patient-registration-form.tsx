@@ -88,7 +88,6 @@ export function PatientRegistrationForm({
   patient,
   mode = "create",
 }: Readonly<PatientRegistrationFormProps>) {
-  console.log("patient==>", patient);
   const router = useRouter();
   const [open, setOpen] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition();

@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Gender } from "@/generated/prisma/enums";
+import React from "react";
 
 const TABLE_COLS = [
   { label: "Parameter", cls: "w-[40%] text-left" },
@@ -58,6 +59,19 @@ interface ReportProps {
 
 export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
   const textGroupId = testGroupItem.id.split("-")[0];
+
+  const groupedTests = testGroupItem.tests.reduce(
+    (acc, item) => {
+      const key = item.test.sectionName ?? "__default__";
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(item);
+      return acc;
+    },
+    {} as Record<string, typeof testGroupItem.tests>,
+  );
+
   return (
     <div className="mx-auto max-w-4xl bg-white text-zinc-900 py-4 px-6 pt-0">
       <div className="flex items-center justify-between pb-2">
@@ -89,55 +103,76 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
         </TableHeader>
 
         <TableBody>
-          {testGroupItem.tests.map((item, index) => {
-            const test = item.test;
-            const resultValue = Number.parseFloat(item.resultValue ?? "");
-            const { low, high } = parseNormalRange(
-              test.normalValueMale || test.normalValueFemale || "",
-            );
-            const status = getStatus(resultValue, low, high);
-            const unit = test.testUnit?.name || "";
+          {Object.entries(groupedTests).map(([section, tests]) => (
+            <React.Fragment key={section}>
+              {section !== "__default__" && (
+                <TableRow className="hover:bg-transparent border-0">
+                  <TableCell
+                    colSpan={4}
+                    className="font-bold uppercase text-xs py-1"
+                  >
+                    {section}
+                  </TableCell>
+                </TableRow>
+              )}
+              {tests.map((item) => {
+                const test = item.test;
+                const resultValue = Number.parseFloat(item.resultValue ?? "");
+                const { low, high } = parseNormalRange(
+                  test.normalValueMale || test.normalValueFemale || "",
+                );
+                const status = getStatus(resultValue, low, high);
+                const unit = test.testUnit?.name || "";
 
-            return (
-              <TableRow
-                key={item.id}
-                className={`border-0 transition-colors ${ROW_CLS[status]}`}
-              >
-                {/* Parameter name */}
-                <TableCell className="py-2">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-[10px] text-slate-500 bg-slate-100 print:bg-slate-200 px-1.5 py-0.5 rounded print-rounded">
+                return (
+                  <TableRow
+                    key={item.id}
+                    className={`border-0 transition-colors ${ROW_CLS[status]}`}
+                  >
+                    {/* Parameter name */}
+                    <TableCell className="py-1">
+                      <div className="flex items-center gap-3">
+                        {/* <span className="font-mono text-[10px] text-slate-500 bg-slate-100 print:bg-slate-200 px-1.5 py-0.5 rounded print-rounded">
                       {test.name.slice(0, 2).toUpperCase()}
-                    </span>
-                    <div>
-                      <p className="text-xs font-medium text-slate-700">
-                        {test.name}
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
+                    </span> */}
+                        <div>
+                          <p className="text-xs font-medium text-slate-700">
+                            {test.name}
+                          </p>
+                          {test.fullName && (
+                            <p className="text-[10px] font-medium text-slate-500">
+                              {test.fullName}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
 
-                {/* Result */}
-                <TableCell className="py-2 text-center">
-                  <span className={`font-mono text-xs ${VALUE_CLS[status]}`}>
-                    {item.resultValue}
-                  </span>
-                </TableCell>
+                    {/* Result */}
+                    <TableCell className="py-1 text-center">
+                      <span
+                        className={`font-mono text-xs ${VALUE_CLS[status]}`}
+                      >
+                        {item.resultValue}
+                      </span>
+                    </TableCell>
 
-                {/* Unit */}
-                <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
-                  {unit}
-                </TableCell>
+                    {/* Unit */}
+                    <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
+                      {unit}
+                    </TableCell>
 
-                {/* Reference range */}
-                <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
-                  {pataient.gender === Gender.Male
-                    ? test.normalValueMale
-                    : test.normalValueFemale}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                    {/* Reference range */}
+                    <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
+                      {pataient.gender === Gender.Male
+                        ? test.normalValueMale
+                        : test.normalValueFemale}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </TableBody>
       </Table>
       <SectionDivider label="End Of Report" />

@@ -1,4 +1,5 @@
 import { ReactQRCode } from "@lglab/react-qr-code";
+import Image from "next/image";
 
 interface FooterOneProps {
   index: number;
@@ -13,7 +14,16 @@ export function FooterOne({ index, length }: Readonly<FooterOneProps>) {
         {/* Left - Doctor Signature */}
         <div className="flex-1">
           <div className="border border-dashed border-zinc-400 w-60 h-14 rounded flex items-end justify-center mb-2">
-            <p className="text-xs text-zinc-400 mb-1">Signature</p>
+            <div className="flex flex-col justify-center items-center">
+              <Image
+                src="/Sign.png"
+                className="w-20 h-auto"
+                width={80}
+                height={80}
+                alt="Sign"
+              />
+              <p className="text-xs text-zinc-400 mb-1">Signature</p>
+            </div>
           </div>
           <div>
             <p className="font-semibold text-zinc-800 text-sm">

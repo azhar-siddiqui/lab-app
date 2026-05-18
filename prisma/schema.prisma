@@ -160,6 +160,9 @@ model Test {
   id   String @id @default(uuid())
   name String
 
+  fullName    String?
+  sectionName String?
+
   normalValueMale   String
   normalValueFemale String
 
