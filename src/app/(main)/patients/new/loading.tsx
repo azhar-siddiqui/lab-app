@@ -1,10 +1,10 @@
 import PageContainer from "@/components/layout/page-container";
-import { FormPageSkeleton } from "@/components/skeletons/page-skeletons";
+import { PatientRegistrationSkeleton } from "@/components/skeletons/page-skeletons";
 
 export default function NewPatientLoading() {
   return (
     <PageContainer>
-      <FormPageSkeleton fields={10} />
+      <PatientRegistrationSkeleton />
     </PageContainer>
   );
 }

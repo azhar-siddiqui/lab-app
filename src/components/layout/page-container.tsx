@@ -5,15 +5,13 @@ import { ScrollArea } from "../ui/scroll-area";
 
 function PageSkeleton() {
   return (
-    <div className="flex flex-1 animate-pulse flex-col gap-4 p-4 md:px-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="bg-muted mb-2 h-8 w-48 rounded" />
-          <div className="bg-muted h-4 w-96 rounded" />
-        </div>
+    <div className="flex flex-1 flex-col gap-4">
+      <div className="space-y-2">
+        <div className="bg-muted h-8 w-48 animate-pulse rounded-md" />
+        <div className="bg-muted h-4 w-96 max-w-full animate-pulse rounded-md" />
       </div>
-      <div className="bg-muted mt-6 h-40 w-full rounded-lg" />
-      <div className="bg-muted h-40 w-full rounded-lg" />
+      <div className="bg-muted h-40 w-full animate-pulse rounded-xl" />
+      <div className="bg-muted h-40 w-full animate-pulse rounded-xl" />
     </div>
   );
 }

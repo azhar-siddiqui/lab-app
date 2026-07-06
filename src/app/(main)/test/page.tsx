@@ -1,5 +1,5 @@
 import PageContainer from "@/components/layout/page-container";
-import { TablePageSkeleton } from "@/components/skeletons/page-skeletons";
+import { DataTableSkeleton } from "@/components/skeletons/page-skeletons";
 import { buttonVariants } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -37,7 +37,7 @@ export default function TestPage() {
           reports.
         </p>
 
-        <Suspense fallback={<TablePageSkeleton rows={8} columns={5} />}>
+        <Suspense fallback={<DataTableSkeleton rows={8} columns={5} />}>
           <TestTableSection />
         </Suspense>
       </div>
