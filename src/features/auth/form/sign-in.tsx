@@ -19,7 +19,8 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { getPostAuthRedirect } from "@/lib/onboarding";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ const formSchema = z.object({
 type SignInValues = z.infer<typeof formSchema>;
 
 export default function SignInForm() {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<SignInValues>({
@@ -48,21 +50,47 @@ export default function SignInForm() {
 
   function onSubmit(data: SignInValues) {
     startTransition(async () => {
-      const { error } = await authClient.signIn.email(
-        {
-          email: data.email,
-          password: data.password,
-        },
-        {
-          onSuccess: () => {
-            redirect("/dashboard");
-          },
-        },
-      );
+      const { data: result, error } = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+      });
 
       if (error) {
+        if (
+          error.code === "EMAIL_NOT_VERIFIED" ||
+          error.message?.toLowerCase().includes("verify")
+        ) {
+          toast.message("Verify your email to continue.");
+          router.push(
+            `/auth/verify-email?email=${encodeURIComponent(data.email)}`,
+          );
+          return;
+        }
+
         toast.error(error.message);
+        return;
       }
+
+      const user = result?.user;
+
+      if (!user) {
+        router.push("/dashboard/overview");
+        return;
+      }
+
+      const redirectPath = getPostAuthRedirect({
+        emailVerified: user.emailVerified,
+        onboardingCompleted: user.onboardingCompleted,
+      });
+
+      if (redirectPath === "/auth/verify-email") {
+        router.push(
+          `/auth/verify-email?email=${encodeURIComponent(user.email)}`,
+        );
+        return;
+      }
+
+      router.push(redirectPath);
     });
   }
 

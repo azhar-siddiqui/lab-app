@@ -1,22 +1,22 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import SignUpViewPage from "@/features/auth/sign-up-view";
+import VerifyEmailViewPage from "@/features/auth/verify-email-view";
 import { getServerSession } from "@/lib/get-session";
 import { getPostAuthRedirect } from "@/lib/onboarding";
 
 export const metadata: Metadata = {
-  title: "Sign Up — MedicareLab",
-  description: "Create your MedicareLab account and start managing your pathology lab.",
+  title: "Verify Email — MedicareLab",
+  description: "Verify your email address to continue MedicareLab onboarding.",
 };
 
 export default async function Page() {
   const session = await getServerSession();
   const user = session?.user;
 
-  if (user) {
+  if (user?.emailVerified) {
     redirect(getPostAuthRedirect(user));
   }
 
-  return <SignUpViewPage />;
+  return <VerifyEmailViewPage />;
 }

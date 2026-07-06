@@ -1,4 +1,5 @@
 import { getServerSession } from "@/lib/get-session";
+import { getFreshUserProfile } from "@/lib/get-user-profile";
 import { redirect } from "next/navigation";
 
 export default async function AuthLayout({
@@ -6,10 +7,16 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getServerSession();
+  const session = await getServerSession();
+  const user = session?.user;
 
-  if (user?.session) {
-    redirect("/dashboard/overview");
+  if (user) {
+    const profile = await getFreshUserProfile(user.id);
+
+    if (profile?.onboardingCompleted) {
+      redirect("/dashboard/overview");
+    }
   }
+
   return children;
 }

@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/header";
 import { InfobarProvider } from "@/components/ui/infobar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getServerSession } from "@/lib/get-session";
+import { getFreshUserProfile } from "@/lib/get-user-profile";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -25,6 +26,18 @@ export default async function DashboardLayout({
   const user = session?.user;
 
   if (!user) redirect("/auth/sign-in");
+
+  const profile = await getFreshUserProfile(user.id);
+
+  if (!profile?.emailVerified) {
+    redirect(
+      `/auth/verify-email?email=${encodeURIComponent(profile?.email ?? user.email)}`,
+    );
+  }
+
+  if (!profile?.onboardingCompleted) {
+    redirect("/auth/onboarding/phone");
+  }
 
   // Persisting the sidebar state in the cookie.
   const cookieStore = await cookies();

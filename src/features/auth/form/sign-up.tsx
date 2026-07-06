@@ -18,7 +18,7 @@ import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -38,6 +38,7 @@ const formSchema = z.object({
 type SignUpValues = z.infer<typeof formSchema>;
 
 export default function SignUpForm() {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<SignUpValues>({
@@ -51,22 +52,37 @@ export default function SignUpForm() {
 
   function onSubmit(data: SignUpValues): void {
     startTransition(async () => {
-      const { error } = await authClient.signUp.email(
-        {
-          name: data.name,
-          email: data.email,
-          password: data.password,
-        },
-        {
-          onSuccess: () => {
-            redirect("/dashboard");
-          },
-        },
-      );
+      const callbackURL = `${window.location.origin}/auth/onboarding/phone`;
+
+      const { error } = await authClient.signUp.email({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        callbackURL,
+      });
 
       if (error) {
         toast.error(error.message);
+        return;
       }
+
+      const { error: emailError } = await authClient.sendVerificationEmail({
+        email: data.email,
+        callbackURL,
+      });
+
+      if (emailError) {
+        toast.error(
+          emailError.message ??
+            "Account created, but the verification email could not be sent. Try resending from the next screen.",
+        );
+      } else {
+        toast.success("Account created. Check your email to verify your address.");
+      }
+
+      router.push(
+        `/auth/verify-email?email=${encodeURIComponent(data.email)}`,
+      );
     });
   }
 

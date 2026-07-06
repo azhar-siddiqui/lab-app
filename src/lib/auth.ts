@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { getAppUrl, getTrustedOrigins } from "./app-url";
 import prisma from "./prisma";
 import { seedDefaultLabData } from "./seed-default-lab-data";
+import { sendAuthVerificationEmail } from "./send-verification-email";
 
 export const auth = betterAuth({
   baseURL: getAppUrl(),
@@ -11,6 +12,41 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendOnSignUp: false,
+    sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      try {
+        await sendAuthVerificationEmail({
+          email: user.email,
+          name: user.name,
+          url,
+        });
+      } catch (error) {
+        console.error(
+          `[email] Failed to send verification email to ${user.email}:`,
+          error,
+        );
+        throw error;
+      }
+    },
+  },
+  user: {
+    additionalFields: {
+      phoneNumber: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      onboardingCompleted: {
+        type: "boolean",
+        required: false,
+        input: false,
+      },
+    },
   },
   trustedOrigins: getTrustedOrigins(),
   databaseHooks: {

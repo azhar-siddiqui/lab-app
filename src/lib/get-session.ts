@@ -4,5 +4,8 @@ import { cache } from "react";
 import { auth } from "./auth";
 
 export const getServerSession = cache(async () => {
-  return await auth.api.getSession({ headers: await headers() });
+  return await auth.api.getSession({
+    headers: await headers(),
+    query: { disableCookieCache: true },
+  });
 });
