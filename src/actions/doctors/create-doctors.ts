@@ -40,6 +40,7 @@ export async function CreateDoctor(
 
   revalidateTag(cacheTags.doctors(user.id), "max");
   revalidatePath("/patients/new");
+  revalidatePath("/dashboard/referral-doctors");
 
   return {
     status: "success",

@@ -54,7 +54,7 @@ export async function DashboardOverview({ userName }: DashboardOverviewProps) {
       label: "Referral doctors",
       value: stats.totalDoctors,
       icon: Stethoscope,
-      href: "/patients/new",
+      href: "/dashboard/referral-doctors",
     },
   ] as const;
 

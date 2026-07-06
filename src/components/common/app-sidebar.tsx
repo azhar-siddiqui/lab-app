@@ -187,14 +187,14 @@ export default function AppSidebar({ user }: Readonly<AppSidebarProps>) {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem
-                    onClick={() => router.push("/dashboard/profile")}
+                    onClick={() => router.push("/profile")}
                   >
                     <Icons.account className="mr-2 h-4 w-4" />
                     Profile
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
-                    onClick={() => router.push("/dashboard/notifications")}
+                    onClick={() => router.push("/notifications")}
                   >
                     <Icons.notification className="mr-2 h-4 w-4" />
                     Notifications
