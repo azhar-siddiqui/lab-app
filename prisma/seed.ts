@@ -1,49 +1,34 @@
-import { testGroupCategories } from "@/constants/test-group";
-import { labUnits } from "@/constants/unit";
-import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import "dotenv/config";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({ adapter });
+import { seedDefaultLabData } from "@/lib/seed-default-lab-data";
+import prisma from "@/lib/prisma";
 
 async function main() {
-  const userId = "IX4XOsHMFickAe6eTkS5xqg5Ueiz64Md";
+  const userId = process.env.SEED_USER_ID ?? process.argv[2];
 
-  console.log("🌱 Seeding units...");
+  if (!userId) {
+    throw new Error(
+      "Provide a user id via SEED_USER_ID env var or as a CLI argument.",
+    );
+  }
 
-  await prisma.testCategory.createMany({
-    data: testGroupCategories.map((category) => ({
-      userId: userId,
-      name: category.name,
-      description: category.description,
-    })),
-    skipDuplicates: true,
-  });
+  console.log(`🌱 Seeding default lab data for user ${userId}...`);
 
-  await prisma.testUnit.createMany({
-    data: labUnits.map((unit) => ({
-      userId: userId,
-      name: unit.name,
-      unitCategory: unit.category,
-    })),
-    // skipDuplicates: true,
-  });
+  const result = await seedDefaultLabData(userId);
 
-  console.log("✅ Seeding completed");
+  if (result.seeded) {
+    console.log("✅ Seeding completed");
+  } else {
+    console.log("ℹ️ User already has seed data — skipped");
+  }
 }
 
 main()
   .then(async () => {
     await prisma.$disconnect();
-    await pool.end();
   })
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();
-    await pool.end();
     process.exit(1);
   });
