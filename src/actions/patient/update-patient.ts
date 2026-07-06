@@ -126,6 +126,8 @@ export async function UpdatePatient(
 
     revalidateTag(cacheTags.patientReports(session.user.id), "max");
     revalidatePath("/patients");
+    revalidatePath("/dashboard/business/daily");
+    revalidatePath("/dashboard/overview");
 
     return {
       status: "success",

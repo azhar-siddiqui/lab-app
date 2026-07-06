@@ -505,6 +505,83 @@ export function DashboardOverviewSkeleton() {
   );
 }
 
+export function DailyBusinessSkeleton() {
+  return (
+    <div className="flex flex-1 flex-col space-y-6">
+      <div className="rounded-xl border bg-card px-5 py-4 ring-1 ring-foreground/10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-5 w-44" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Skeleton className="size-8 rounded-lg" />
+            <Skeleton className="h-8 w-44 rounded-lg" />
+            <Skeleton className="size-8 rounded-lg" />
+            <Skeleton className="h-8 w-16 rounded-lg" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10"
+          >
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="mt-3 h-8 w-20" />
+            <Skeleton className="mt-4 h-6 w-28 rounded-full" />
+            <Skeleton className="mt-4 h-4 w-32" />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+        <div className="rounded-xl border bg-card ring-1 ring-foreground/10 md:col-span-2">
+          <div className="flex flex-col gap-4 border-b px-5 py-5 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="h-8 w-full rounded-lg md:max-w-sm" />
+          </div>
+          <div className="divide-y">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-4 px-5 py-4"
+              >
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border bg-card ring-1 ring-foreground/10">
+          <div className="space-y-3 border-b px-5 py-5">
+            <Skeleton className="size-10 rounded-lg" />
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+          <div className="space-y-1 px-5 py-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex justify-between py-2.5">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PageHeadingSkeleton() {
   return (
     <div className="mb-4 space-y-2 pb-4">

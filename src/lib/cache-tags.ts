@@ -5,4 +5,6 @@ export const cacheTags = {
   testUnits: (userId: string) => `test-units:${userId}`,
   patientReports: (userId: string) => `patient-reports:${userId}`,
   dashboardStats: (userId: string) => `dashboard-stats:${userId}`,
+  dailyBusiness: (userId: string, dateKey: string) =>
+    `daily-business:${userId}:${dateKey}`,
 } as const;

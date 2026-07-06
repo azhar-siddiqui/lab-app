@@ -1,3 +1,9 @@
+import {
+  DailyBusinessData,
+  getDayBounds,
+  getDiscountAmount,
+  getGrossAmount,
+} from "@/lib/daily-business";
 import { serializeDecimal } from "@/lib/fomat-price";
 import { cacheTags } from "@/lib/cache-tags";
 import prisma from "@/lib/prisma";
@@ -258,6 +264,103 @@ export const fetchDashboardStats = cache((userId: string) =>
         cacheTags.patientReports(userId),
         cacheTags.doctors(userId),
         cacheTags.testGroups(userId),
+      ],
+      revalidate: 30,
+    },
+  )(),
+);
+
+export const fetchDailyBusiness = cache((userId: string, dateKey: string) =>
+  unstable_cache(
+    async (): Promise<DailyBusinessData> => {
+      const { start, end } = getDayBounds(dateKey);
+
+      const reports = await prisma.patientReport.findMany({
+        where: {
+          userId,
+          createdAt: { gte: start, lt: end },
+        },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          reportDate: true,
+          totalAmount: true,
+          patient: {
+            select: {
+              id: true,
+              name: true,
+              contactNumber: true,
+              totalRs: true,
+              discount: true,
+              ammountRecived: true,
+              balance: true,
+            },
+          },
+          doctor: {
+            select: { name: true },
+          },
+          testGroups: {
+            select: {
+              testGroup: {
+                select: { shortName: true },
+              },
+            },
+          },
+        },
+      });
+
+      const cases = reports.map((report) => {
+        const netAmount = report.patient.totalRs.toNumber();
+        const discountPercent = report.patient.discount.toNumber();
+        const grossAmount = getGrossAmount(netAmount, discountPercent);
+        const discountAmount = getDiscountAmount(netAmount, discountPercent);
+
+        return {
+          id: report.id,
+          patientId: report.patient.id,
+          patientName: report.patient.name,
+          contactNumber: report.patient.contactNumber,
+          doctorName: report.doctor.name,
+          testGroups: report.testGroups.map((group) => group.testGroup.shortName),
+          grossAmount,
+          discountPercent,
+          discountAmount,
+          totalAmount: report.totalAmount.toNumber(),
+          amountReceived: report.patient.ammountRecived.toNumber(),
+          balance: report.patient.balance.toNumber(),
+          reportDate: report.reportDate,
+        };
+      });
+
+      const totals = cases.reduce(
+        (acc, item) => ({
+          grossBilling: acc.grossBilling + item.grossAmount,
+          totalDiscount: acc.totalDiscount + item.discountAmount,
+          netBilling: acc.netBilling + item.totalAmount,
+          totalReceived: acc.totalReceived + item.amountReceived,
+          totalDue: acc.totalDue + item.balance,
+        }),
+        {
+          grossBilling: 0,
+          totalDiscount: 0,
+          netBilling: 0,
+          totalReceived: 0,
+          totalDue: 0,
+        },
+      );
+
+      return {
+        dateKey,
+        totalCases: cases.length,
+        ...totals,
+        cases,
+      };
+    },
+    ["daily-business", userId, dateKey],
+    {
+      tags: [
+        cacheTags.dailyBusiness(userId, dateKey),
+        cacheTags.patientReports(userId),
       ],
       revalidate: 30,
     },
