@@ -410,6 +410,101 @@ export function IntroductionPageSkeleton() {
   );
 }
 
+export function DashboardOverviewSkeleton() {
+  return (
+    <div className="flex flex-1 flex-col space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-4 w-72 max-w-full" />
+        </div>
+        <Skeleton className="h-7 w-28 rounded-full" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10"
+          >
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="mt-3 h-8 w-20" />
+            <Skeleton className="mt-4 h-6 w-28 rounded-full" />
+            <Skeleton className="mt-4 h-4 w-32" />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-xl border bg-card ring-1 ring-foreground/10 lg:col-span-2">
+          <div className="flex items-center justify-between border-b px-4 py-4">
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-8 w-20 rounded-lg" />
+          </div>
+          <div className="divide-y">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-4 px-4 py-3.5"
+              >
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-5 lg:gap-6">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-xl border bg-card px-5 py-5 ring-1 ring-foreground/10"
+            >
+              <div className="flex items-center gap-4">
+                <Skeleton className="size-10 rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-6 w-10" />
+                </div>
+              </div>
+            </div>
+          ))}
+          <div className="rounded-xl border bg-card px-5 py-5 ring-1 ring-foreground/10">
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="mt-2 h-4 w-full" />
+            <Skeleton className="mt-2 h-4 w-[90%]" />
+            <Skeleton className="mt-5 h-8 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <Skeleton className="h-5 w-28" />
+        <Skeleton className="h-4 w-56" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10"
+            >
+              <Skeleton className="size-9 rounded-lg" />
+              <Skeleton className="mt-3 h-4 w-24" />
+              <Skeleton className="mt-2 h-3 w-full" />
+              <Skeleton className="mt-4 h-8 w-full rounded-lg" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PageHeadingSkeleton() {
   return (
     <div className="mb-4 space-y-2 pb-4">

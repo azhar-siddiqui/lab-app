@@ -106,6 +106,164 @@ export const fetchPatientReports = cache((userId: string) =>
   )(),
 );
 
+export type DashboardRecentCase = {
+  id: string;
+  patientName: string;
+  tests: string;
+  status: "Ready" | "Pending" | "In progress";
+  reportDate: string;
+  amount: number;
+  balance: number;
+};
+
+export type DashboardStats = {
+  totalPatients: number;
+  totalReports: number;
+  totalDoctors: number;
+  totalTestGroups: number;
+  casesToday: number;
+  revenueToday: number;
+  totalRevenue: number;
+  outstandingDues: number;
+  pendingReports: number;
+  recentCases: DashboardRecentCase[];
+};
+
+function getReportStatus(
+  testGroups: {
+    tests: { resultValue: string | null }[];
+  }[],
+): DashboardRecentCase["status"] {
+  const hasPending = testGroups.some((group) =>
+    group.tests.some((test) => !test.resultValue?.trim()),
+  );
+  const hasAnyResult = testGroups.some((group) =>
+    group.tests.some((test) => Boolean(test.resultValue?.trim())),
+  );
+
+  if (!hasPending) return "Ready";
+  if (!hasAnyResult) return "Pending";
+  return "In progress";
+}
+
+export const fetchDashboardStats = cache((userId: string) =>
+  unstable_cache(
+    async (): Promise<DashboardStats> => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const [
+        totalPatients,
+        totalReports,
+        totalDoctors,
+        totalTestGroups,
+        casesToday,
+        revenueTodayAgg,
+        revenueAgg,
+        duesAgg,
+        pendingReports,
+        recentReports,
+      ] = await Promise.all([
+        prisma.patient.count({ where: { userId } }),
+        prisma.patientReport.count({ where: { userId } }),
+        prisma.doctor.count({ where: { userId } }),
+        prisma.testGroup.count({ where: { userId } }),
+        prisma.patientReport.count({
+          where: {
+            userId,
+            createdAt: { gte: today, lt: tomorrow },
+          },
+        }),
+        prisma.patientReport.aggregate({
+          where: {
+            userId,
+            createdAt: { gte: today, lt: tomorrow },
+          },
+          _sum: { totalAmount: true },
+        }),
+        prisma.patientReport.aggregate({
+          where: { userId },
+          _sum: { totalAmount: true },
+        }),
+        prisma.patient.aggregate({
+          where: { userId, balance: { gt: 0 } },
+          _sum: { balance: true },
+        }),
+        prisma.patientReport.count({
+          where: {
+            userId,
+            testGroups: {
+              some: {
+                tests: {
+                  some: {
+                    OR: [{ resultValue: null }, { resultValue: "" }],
+                  },
+                },
+              },
+            },
+          },
+        }),
+        prisma.patientReport.findMany({
+          where: { userId },
+          orderBy: { createdAt: "desc" },
+          take: 6,
+          select: {
+            id: true,
+            reportDate: true,
+            totalAmount: true,
+            patient: {
+              select: { name: true, balance: true },
+            },
+            testGroups: {
+              select: {
+                testGroup: { select: { shortName: true } },
+                tests: { select: { resultValue: true } },
+              },
+            },
+          },
+        }),
+      ]);
+
+      const recentCases: DashboardRecentCase[] = recentReports.map((report) => ({
+        id: report.id,
+        patientName: report.patient.name,
+        tests: report.testGroups
+          .map((group) => group.testGroup.shortName)
+          .join(", "),
+        status: getReportStatus(report.testGroups),
+        reportDate: report.reportDate,
+        amount: report.totalAmount.toNumber(),
+        balance: report.patient.balance.toNumber(),
+      }));
+
+      return {
+        totalPatients,
+        totalReports,
+        totalDoctors,
+        totalTestGroups,
+        casesToday,
+        revenueToday: revenueTodayAgg._sum.totalAmount?.toNumber() ?? 0,
+        totalRevenue: revenueAgg._sum.totalAmount?.toNumber() ?? 0,
+        outstandingDues: duesAgg._sum.balance?.toNumber() ?? 0,
+        pendingReports,
+        recentCases,
+      };
+    },
+    ["dashboard-stats", userId],
+    {
+      tags: [
+        cacheTags.dashboardStats(userId),
+        cacheTags.patientReports(userId),
+        cacheTags.doctors(userId),
+        cacheTags.testGroups(userId),
+      ],
+      revalidate: 30,
+    },
+  )(),
+);
+
 export const fetchPatientReportById = cache(
   async (reportId: string, userId: string) => {
     const report = await prisma.patientReport.findFirst({
