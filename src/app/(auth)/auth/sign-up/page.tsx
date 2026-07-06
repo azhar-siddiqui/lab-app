@@ -3,10 +3,10 @@ import { Metadata } from "next";
 import SignUpViewPage from "@/features/auth/sign-up-view";
 
 export const metadata: Metadata = {
-  title: "Authentication | Sign Up",
-  description: "Sign Up page for authentication.",
+  title: "Sign Up — MedicareLab",
+  description: "Create your MedicareLab account and start managing your pathology lab.",
 };
 
-export default async function Page() {
+export default function Page() {
   return <SignUpViewPage />;
 }

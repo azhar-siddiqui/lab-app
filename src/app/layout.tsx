@@ -41,6 +41,7 @@ export default async function RootLayout({
           "bg-background overflow-x-hidden overscroll-none font-sans antialiased",
           fontVariables,
         )}
+        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"
