@@ -93,6 +93,34 @@
   animation-play-state: paused;
 }
 
+@keyframes marketing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes marketing-float-slow {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.05);
+  }
+}
+
+.marketing-float {
+  animation: marketing-float 5s ease-in-out infinite;
+}
+
+.marketing-float-slow {
+  animation: marketing-float-slow 7s ease-in-out infinite;
+}
+
 ::view-transition-new(root) {
   /* Apply the reveal animation */
   animation: reveal 0.4s ease-in-out forwards;
