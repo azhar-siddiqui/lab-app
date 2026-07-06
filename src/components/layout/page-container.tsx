@@ -1,4 +1,6 @@
+import { PageHeadingSkeleton } from "@/components/skeletons/page-skeletons";
 import type { InfobarContent } from "@/components/ui/infobar";
+import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
 import { Heading } from "../ui/heading";
 import { ScrollArea } from "../ui/scroll-area";
@@ -6,12 +8,9 @@ import { ScrollArea } from "../ui/scroll-area";
 function PageSkeleton() {
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div className="space-y-2">
-        <div className="bg-muted h-8 w-48 animate-pulse rounded-md" />
-        <div className="bg-muted h-4 w-96 max-w-full animate-pulse rounded-md" />
-      </div>
-      <div className="bg-muted h-40 w-full animate-pulse rounded-xl" />
-      <div className="bg-muted h-40 w-full animate-pulse rounded-xl" />
+      <PageHeadingSkeleton />
+      <Skeleton className="h-40 w-full rounded-xl" />
+      <Skeleton className="h-40 w-full rounded-xl" />
     </div>
   );
 }
