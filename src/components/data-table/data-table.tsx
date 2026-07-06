@@ -35,7 +35,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Search } from "lucide-react";
-import React from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { DateRange } from "react-day-picker";
 
 interface DataTableProps<TData, TValue> {
@@ -69,7 +69,7 @@ function toSearchableString(value: unknown) {
   return "";
 }
 
-export function DataTable<TData, TValue>({
+function DataTableInner<TData, TValue>({
   columns,
   data,
   searchKeys,
@@ -83,7 +83,7 @@ export function DataTable<TData, TValue>({
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
   const [search, setSearch] = React.useState("");
 
-  const filteredData = React.useMemo(() => {
+  const filteredData = useMemo(() => {
     let filtered = [...data];
 
     if (search && searchKeys?.length) {
@@ -137,12 +137,24 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-
     state: {
       sorting,
       columnFilters,
     },
   });
+
+  const clearFilters = useCallback(() => {
+    setSearch("");
+    setDateRange(undefined);
+  }, []);
+
+  const handlePreviousPage = useCallback(() => {
+    table.previousPage();
+  }, [table]);
+
+  const handleNextPage = useCallback(() => {
+    table.nextPage();
+  }, [table]);
 
   return (
     <div>
@@ -200,14 +212,7 @@ export function DataTable<TData, TValue>({
             </PopoverContent>
           </Popover>
           {/* CLEAR FILTERS */}
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => {
-              setSearch("");
-              setDateRange(undefined);
-            }}
-          >
+          <Button variant="outline" type="button" onClick={clearFilters}>
             Clear
           </Button>
         </div>
@@ -266,7 +271,7 @@ export function DataTable<TData, TValue>({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.previousPage()}
+          onClick={handlePreviousPage}
           disabled={!table.getCanPreviousPage()}
         >
           Previous
@@ -274,7 +279,7 @@ export function DataTable<TData, TValue>({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.nextPage()}
+          onClick={handleNextPage}
           disabled={!table.getCanNextPage()}
         >
           Next
@@ -283,3 +288,5 @@ export function DataTable<TData, TValue>({
     </div>
   );
 }
+
+export const DataTable = memo(DataTableInner) as typeof DataTableInner;

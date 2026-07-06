@@ -1,12 +1,12 @@
 "use server";
 
-import { cacheTags } from "@/lib/cache-tags";
 import { toDateKey } from "@/lib/daily-business";
+import { invalidateLabData } from "@/lib/invalidate-lab-cache";
 import { getServerSession } from "@/lib/get-session";
 import prisma from "@/lib/prisma";
 import { ApiResponse } from "@/lib/types";
 import { expenseFormSchema, ExpenseFormValues } from "@/validation/expense-form";
-import { revalidatePath, revalidateTag } from "next/cache";
+
 import { unauthorized } from "next/navigation";
 
 export async function updateExpense(
@@ -47,9 +47,13 @@ export async function updateExpense(
     },
   });
 
-  revalidateTag(cacheTags.expenses(user.id, toDateKey(existing.expenseDate)), "max");
-  revalidateTag(cacheTags.expenses(user.id, toDateKey(data.expenseDate)), "max");
-  revalidatePath("/dashboard/business/expenses");
+  invalidateLabData(user.id, {
+    dateKeys: [
+      toDateKey(existing.expenseDate),
+      toDateKey(data.expenseDate),
+    ],
+    paths: ["/dashboard/business/expenses"],
+  });
 
   return {
     status: "success",

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -33,7 +33,39 @@ const gridClassNames = {
   md: "md:grid-cols-2 lg:grid-cols-4",
 } as const;
 
-export function StatCardsGrid({
+const StatCard = memo(function StatCard({
+  card,
+  footerClassName,
+}: {
+  card: StatCardConfig;
+  footerClassName?: string;
+}) {
+  const Icon = card.icon;
+
+  return (
+    <Card className="@container/card">
+      <CardHeader>
+        <CardDescription>{card.label}</CardDescription>
+        <CardTitle className="text-2xl font-semibold @[250px]/card:text-3xl">
+          {card.value}
+        </CardTitle>
+        <CardAction>
+          <Badge variant={card.badgeVariant ?? "outline"}>
+            <Icon className="size-3.5" />
+            {card.badge}
+          </Badge>
+        </CardAction>
+      </CardHeader>
+      <CardFooter
+        className={cn("text-muted-foreground text-sm", footerClassName)}
+      >
+        {card.footer}
+      </CardFooter>
+    </Card>
+  );
+});
+
+export const StatCardsGrid = memo(function StatCardsGrid({
   cards,
   columnsFrom = "sm",
   footerClassName,
@@ -46,29 +78,12 @@ export function StatCardsGrid({
       )}
     >
       {cards.map((card) => (
-        <Card key={card.label} className="@container/card">
-          <CardHeader>
-            <CardDescription>{card.label}</CardDescription>
-            <CardTitle className="text-2xl font-semibold @[250px]/card:text-3xl">
-              {card.value}
-            </CardTitle>
-            <CardAction>
-              <Badge variant={card.badgeVariant ?? "outline"}>
-                <card.icon className="size-3.5" />
-                {card.badge}
-              </Badge>
-            </CardAction>
-          </CardHeader>
-          <CardFooter
-            className={cn(
-              "text-muted-foreground text-sm",
-              footerClassName,
-            )}
-          >
-            {card.footer}
-          </CardFooter>
-        </Card>
+        <StatCard
+          key={card.label}
+          card={card}
+          footerClassName={footerClassName}
+        />
       ))}
     </div>
   );
-}
+});

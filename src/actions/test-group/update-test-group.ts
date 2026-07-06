@@ -10,8 +10,7 @@ import {
   testGroupFormSchema,
   TestGroupFormValuesType,
 } from "@/validation/test-group";
-import { cacheTags } from "@/lib/cache-tags";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { invalidateLabData } from "@/lib/invalidate-lab-cache";
 
 export async function UpdateTestGroup(
   testGroupId: string,
@@ -107,8 +106,11 @@ export async function UpdateTestGroup(
       }
     });
 
-    revalidateTag(cacheTags.testGroups(session.user.id), "max");
-    revalidatePath("/test");
+    invalidateLabData(session.user.id, {
+      testGroupId,
+      includeCatalog: true,
+      paths: ["/test"],
+    });
 
     return {
       status: "success",

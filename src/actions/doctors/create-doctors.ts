@@ -7,8 +7,7 @@ import {
   doctorFormSchema,
   DoctorFormValuesTypes,
 } from "@/validation/doctorform";
-import { cacheTags } from "@/lib/cache-tags";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { invalidateLabData } from "@/lib/invalidate-lab-cache";
 import { unauthorized } from "next/navigation";
 
 export async function CreateDoctor(
@@ -38,9 +37,10 @@ export async function CreateDoctor(
     },
   });
 
-  revalidateTag(cacheTags.doctors(user.id), "max");
-  revalidatePath("/patients/new");
-  revalidatePath("/dashboard/referral-doctors");
+  invalidateLabData(user.id, {
+    includeDoctors: true,
+    paths: ["/patients/new", "/dashboard/referral-doctors"],
+  });
 
   return {
     status: "success",

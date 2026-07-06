@@ -12,111 +12,105 @@ import {
 import { ExpenseCategory } from "@/generated/prisma/enums";
 import { serializeDecimal } from "@/lib/fomat-price";
 import { cacheTags } from "@/lib/cache-tags";
+import { createCachedQueryFn } from "@/lib/cache-utils";
 import prisma from "@/lib/prisma";
-import { unstable_cache } from "next/cache";
-import { cache } from "react";
 
-export const fetchDoctors = cache((userId: string) =>
-  unstable_cache(
-    async () =>
-      prisma.doctor.findMany({
-        where: { userId },
-        select: { id: true, name: true, specialization: true },
-      }),
-    ["doctors", userId],
-    { tags: [cacheTags.doctors(userId)], revalidate: 120 },
-  )(),
-);
+export const fetchDoctors = createCachedQueryFn({
+  getKeyParts: (userId: string) => ["doctors", userId],
+  getTags: (userId: string) => [cacheTags.doctors(userId)],
+  profile: "catalog",
+  fn: (userId: string) =>
+    prisma.doctor.findMany({
+      where: { userId },
+      select: { id: true, name: true, specialization: true },
+    }),
+});
 
-export const fetchTestGroups = cache((userId: string) =>
-  unstable_cache(
-    async () => {
-      const data = await prisma.testGroup.findMany({
-        where: { userId },
-        select: {
-          id: true,
-          name: true,
-          shortName: true,
-          price: true,
-          testCategory: {
-            select: { id: true, name: true },
-          },
-          createdAt: true,
+export const fetchTestGroups = createCachedQueryFn({
+  getKeyParts: (userId: string) => ["test-groups", userId],
+  getTags: (userId: string) => [cacheTags.testGroups(userId)],
+  profile: "catalog",
+  fn: async (userId: string) => {
+    const data = await prisma.testGroup.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        shortName: true,
+        price: true,
+        testCategory: {
+          select: { id: true, name: true },
         },
-      });
+        createdAt: true,
+      },
+    });
 
-      return data.map((item) => ({
-        ...item,
-        price: item.price.toNumber(),
-      }));
-    },
-    ["test-groups", userId],
-    { tags: [cacheTags.testGroups(userId)], revalidate: 120 },
-  )(),
-);
+    return data.map((item) => ({
+      ...item,
+      price: item.price.toNumber(),
+    }));
+  },
+});
 
-export const fetchTestCategories = cache((userId: string) =>
-  unstable_cache(
-    async () =>
-      prisma.testCategory.findMany({
-        where: { userId },
-        select: { id: true, name: true, description: true },
-      }),
-    ["test-categories", userId],
-    { tags: [cacheTags.testCategories(userId)], revalidate: 120 },
-  )(),
-);
+export const fetchTestCategories = createCachedQueryFn({
+  getKeyParts: (userId: string) => ["test-categories", userId],
+  getTags: (userId: string) => [cacheTags.testCategories(userId)],
+  profile: "catalog",
+  fn: (userId: string) =>
+    prisma.testCategory.findMany({
+      where: { userId },
+      select: { id: true, name: true, description: true },
+    }),
+});
 
-export const fetchTestUnits = cache((userId: string) =>
-  unstable_cache(
-    async () =>
-      prisma.testUnit.findMany({
-        where: { userId },
-        select: { id: true, name: true },
-      }),
-    ["test-units", userId],
-    { tags: [cacheTags.testUnits(userId)], revalidate: 120 },
-  )(),
-);
+export const fetchTestUnits = createCachedQueryFn({
+  getKeyParts: (userId: string) => ["test-units", userId],
+  getTags: (userId: string) => [cacheTags.testUnits(userId)],
+  profile: "catalog",
+  fn: (userId: string) =>
+    prisma.testUnit.findMany({
+      where: { userId },
+      select: { id: true, name: true },
+    }),
+});
 
-export const fetchPatientReports = cache((userId: string) =>
-  unstable_cache(
-    async () => {
-      const reports = await prisma.patientReport.findMany({
-        where: { userId },
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          patientId: true,
-          totalAmount: true,
-          reportDate: true,
-          patient: {
-            select: {
-              id: true,
-              name: true,
-              contactNumber: true,
-              balance: true,
-            },
+export const fetchPatientReports = createCachedQueryFn({
+  getKeyParts: (userId: string) => ["patient-reports", userId],
+  getTags: (userId: string) => [cacheTags.patientReports(userId)],
+  profile: "live",
+  fn: async (userId: string) => {
+    const reports = await prisma.patientReport.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        patientId: true,
+        totalAmount: true,
+        reportDate: true,
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            contactNumber: true,
+            balance: true,
           },
-          testGroups: {
-            select: {
-              id: true,
-              testGroup: {
-                select: {
-                  shortName: true,
-                },
+        },
+        testGroups: {
+          select: {
+            id: true,
+            testGroup: {
+              select: {
+                shortName: true,
               },
             },
           },
         },
-      });
+      },
+    });
 
-      return serializeDecimal(reports);
-    },
-    ["patient-reports", userId],
-    { tags: [cacheTags.patientReports(userId)], revalidate: 30 },
-  )(),
-);
+    return serializeDecimal(reports);
+  },
+});
 
 export type DashboardRecentCase = {
   id: string;
@@ -137,6 +131,7 @@ export type DashboardStats = {
   revenueToday: number;
   totalRevenue: number;
   outstandingDues: number;
+  duePatientCount: number;
   pendingReports: number;
   recentCases: DashboardRecentCase[];
 };
@@ -158,305 +153,315 @@ function getReportStatus(
   return "In progress";
 }
 
-export const fetchDashboardStats = cache((userId: string) =>
-  unstable_cache(
-    async (): Promise<DashboardStats> => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+export const fetchDashboardStats = createCachedQueryFn({
+  getKeyParts: (userId: string) => ["dashboard-stats", userId],
+  getTags: (userId: string) => [
+    cacheTags.dashboardStats(userId),
+    cacheTags.patientReports(userId),
+    cacheTags.doctors(userId),
+    cacheTags.testGroups(userId),
+  ],
+  profile: "live",
+  fn: async (userId: string): Promise<DashboardStats> => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const [
-        totalPatients,
-        totalReports,
-        totalDoctors,
-        totalTestGroups,
-        casesToday,
-        revenueTodayAgg,
-        revenueAgg,
-        duesAgg,
-        pendingReports,
-        recentReports,
-      ] = await Promise.all([
-        prisma.patient.count({ where: { userId } }),
-        prisma.patientReport.count({ where: { userId } }),
-        prisma.doctor.count({ where: { userId } }),
-        prisma.testGroup.count({ where: { userId } }),
-        prisma.patientReport.count({
-          where: {
-            userId,
-            createdAt: { gte: today, lt: tomorrow },
-          },
-        }),
-        prisma.patientReport.aggregate({
-          where: {
-            userId,
-            createdAt: { gte: today, lt: tomorrow },
-          },
-          _sum: { totalAmount: true },
-        }),
-        prisma.patientReport.aggregate({
-          where: { userId },
-          _sum: { totalAmount: true },
-        }),
-        prisma.patient.aggregate({
-          where: { userId, balance: { gt: 0 } },
-          _sum: { balance: true },
-        }),
-        prisma.patientReport.count({
-          where: {
-            userId,
-            testGroups: {
-              some: {
-                tests: {
-                  some: {
-                    OR: [{ resultValue: null }, { resultValue: "" }],
-                  },
+    const [
+      totalPatients,
+      totalReports,
+      totalDoctors,
+      totalTestGroups,
+      casesToday,
+      revenueTodayAgg,
+      revenueAgg,
+      duesAgg,
+      pendingReports,
+      recentReports,
+    ] = await Promise.all([
+      prisma.patient.count({ where: { userId } }),
+      prisma.patientReport.count({ where: { userId } }),
+      prisma.doctor.count({ where: { userId } }),
+      prisma.testGroup.count({ where: { userId } }),
+      prisma.patientReport.count({
+        where: {
+          userId,
+          createdAt: { gte: today, lt: tomorrow },
+        },
+      }),
+      prisma.patientReport.aggregate({
+        where: {
+          userId,
+          createdAt: { gte: today, lt: tomorrow },
+        },
+        _sum: { totalAmount: true },
+      }),
+      prisma.patientReport.aggregate({
+        where: { userId },
+        _sum: { totalAmount: true },
+      }),
+      prisma.patient.aggregate({
+        where: { userId, balance: { gt: 0 } },
+        _sum: { balance: true },
+        _count: true,
+      }),
+      prisma.patientReport.count({
+        where: {
+          userId,
+          testGroups: {
+            some: {
+              tests: {
+                some: {
+                  OR: [{ resultValue: null }, { resultValue: "" }],
                 },
               },
             },
           },
-        }),
-        prisma.patientReport.findMany({
-          where: { userId },
-          orderBy: { createdAt: "desc" },
-          take: 6,
-          select: {
-            id: true,
-            reportDate: true,
-            totalAmount: true,
-            patient: {
-              select: { name: true, balance: true },
-            },
-            testGroups: {
-              select: {
-                testGroup: { select: { shortName: true } },
-                tests: { select: { resultValue: true } },
-              },
-            },
-          },
-        }),
-      ]);
-
-      const recentCases: DashboardRecentCase[] = recentReports.map((report) => ({
-        id: report.id,
-        patientName: report.patient.name,
-        tests: report.testGroups
-          .map((group) => group.testGroup.shortName)
-          .join(", "),
-        status: getReportStatus(report.testGroups),
-        reportDate: report.reportDate,
-        amount: report.totalAmount.toNumber(),
-        balance: report.patient.balance.toNumber(),
-      }));
-
-      return {
-        totalPatients,
-        totalReports,
-        totalDoctors,
-        totalTestGroups,
-        casesToday,
-        revenueToday: revenueTodayAgg._sum.totalAmount?.toNumber() ?? 0,
-        totalRevenue: revenueAgg._sum.totalAmount?.toNumber() ?? 0,
-        outstandingDues: duesAgg._sum.balance?.toNumber() ?? 0,
-        pendingReports,
-        recentCases,
-      };
-    },
-    ["dashboard-stats", userId],
-    {
-      tags: [
-        cacheTags.dashboardStats(userId),
-        cacheTags.patientReports(userId),
-        cacheTags.doctors(userId),
-        cacheTags.testGroups(userId),
-      ],
-      revalidate: 30,
-    },
-  )(),
-);
-
-export const fetchDailyBusiness = cache((userId: string, dateKey: string) =>
-  unstable_cache(
-    async (): Promise<DailyBusinessData> => {
-      const { start, end } = getDayBounds(dateKey);
-
-      const reports = await prisma.patientReport.findMany({
-        where: {
-          userId,
-          createdAt: { gte: start, lt: end },
         },
+      }),
+      prisma.patientReport.findMany({
+        where: { userId },
         orderBy: { createdAt: "desc" },
+        take: 6,
         select: {
           id: true,
           reportDate: true,
           totalAmount: true,
           patient: {
-            select: {
-              id: true,
-              name: true,
-              contactNumber: true,
-              totalRs: true,
-              discount: true,
-              ammountRecived: true,
-              balance: true,
-            },
-          },
-          doctor: {
-            select: { name: true },
+            select: { name: true, balance: true },
           },
           testGroups: {
             select: {
-              testGroup: {
-                select: { shortName: true },
-              },
+              testGroup: { select: { shortName: true } },
+              tests: { select: { resultValue: true } },
             },
           },
         },
-      });
+      }),
+    ]);
 
-      const cases = reports.map((report) => {
-        const netAmount = report.patient.totalRs.toNumber();
-        const discountPercent = report.patient.discount.toNumber();
-        const grossAmount = getGrossAmount(netAmount, discountPercent);
-        const discountAmount = getDiscountAmount(netAmount, discountPercent);
+    const recentCases: DashboardRecentCase[] = recentReports.map((report) => ({
+      id: report.id,
+      patientName: report.patient.name,
+      tests: report.testGroups
+        .map((group) => group.testGroup.shortName)
+        .join(", "),
+      status: getReportStatus(report.testGroups),
+      reportDate: report.reportDate,
+      amount: report.totalAmount.toNumber(),
+      balance: report.patient.balance.toNumber(),
+    }));
 
-        return {
-          id: report.id,
-          patientId: report.patient.id,
-          patientName: report.patient.name,
-          contactNumber: report.patient.contactNumber,
-          doctorName: report.doctor.name,
-          testGroups: report.testGroups.map((group) => group.testGroup.shortName),
-          grossAmount,
-          discountPercent,
-          discountAmount,
-          totalAmount: report.totalAmount.toNumber(),
-          amountReceived: report.patient.ammountRecived.toNumber(),
-          balance: report.patient.balance.toNumber(),
-          reportDate: report.reportDate,
-        };
-      });
+    return {
+      totalPatients,
+      totalReports,
+      totalDoctors,
+      totalTestGroups,
+      casesToday,
+      revenueToday: revenueTodayAgg._sum.totalAmount?.toNumber() ?? 0,
+      totalRevenue: revenueAgg._sum.totalAmount?.toNumber() ?? 0,
+      outstandingDues: duesAgg._sum.balance?.toNumber() ?? 0,
+      duePatientCount: duesAgg._count ?? 0,
+      pendingReports,
+      recentCases,
+    };
+  },
+});
 
-      const totals = cases.reduce(
-        (acc, item) => ({
-          grossBilling: acc.grossBilling + item.grossAmount,
-          totalDiscount: acc.totalDiscount + item.discountAmount,
-          netBilling: acc.netBilling + item.totalAmount,
-          totalReceived: acc.totalReceived + item.amountReceived,
-          totalDue: acc.totalDue + item.balance,
-        }),
-        {
-          grossBilling: 0,
-          totalDiscount: 0,
-          netBilling: 0,
-          totalReceived: 0,
-          totalDue: 0,
+export const fetchDailyBusiness = createCachedQueryFn({
+  getKeyParts: (userId: string, dateKey: string) => [
+    "daily-business",
+    userId,
+    dateKey,
+  ],
+  getTags: (userId: string, dateKey: string) => [
+    cacheTags.dailyBusiness(userId, dateKey),
+    cacheTags.patientReports(userId),
+  ],
+  profile: "live",
+  fn: async (userId: string, dateKey: string): Promise<DailyBusinessData> => {
+    const { start, end } = getDayBounds(dateKey);
+
+    const reports = await prisma.patientReport.findMany({
+      where: {
+        userId,
+        createdAt: { gte: start, lt: end },
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        reportDate: true,
+        totalAmount: true,
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            contactNumber: true,
+            totalRs: true,
+            discount: true,
+            ammountRecived: true,
+            balance: true,
+          },
         },
-      );
+        doctor: {
+          select: { name: true },
+        },
+        testGroups: {
+          select: {
+            testGroup: {
+              select: { shortName: true },
+            },
+          },
+        },
+      },
+    });
+
+    const cases = reports.map((report) => {
+      const netAmount = report.patient.totalRs.toNumber();
+      const discountPercent = report.patient.discount.toNumber();
+      const grossAmount = getGrossAmount(netAmount, discountPercent);
+      const discountAmount = getDiscountAmount(netAmount, discountPercent);
 
       return {
-        dateKey,
-        totalCases: cases.length,
-        ...totals,
-        cases,
+        id: report.id,
+        patientId: report.patient.id,
+        patientName: report.patient.name,
+        contactNumber: report.patient.contactNumber,
+        doctorName: report.doctor.name,
+        testGroups: report.testGroups.map((group) => group.testGroup.shortName),
+        grossAmount,
+        discountPercent,
+        discountAmount,
+        totalAmount: report.totalAmount.toNumber(),
+        amountReceived: report.patient.ammountRecived.toNumber(),
+        balance: report.patient.balance.toNumber(),
+        reportDate: report.reportDate,
       };
-    },
-    ["daily-business", userId, dateKey],
-    {
-      tags: [
-        cacheTags.dailyBusiness(userId, dateKey),
-        cacheTags.patientReports(userId),
-      ],
-      revalidate: 30,
-    },
-  )(),
-);
+    });
 
-export const fetchDailyExpenses = cache((userId: string, dateKey: string) =>
-  unstable_cache(
-    async (): Promise<DailyExpensesData> => {
-      const { start, end } = getDayBounds(dateKey);
+    const totals = cases.reduce(
+      (acc, item) => ({
+        grossBilling: acc.grossBilling + item.grossAmount,
+        totalDiscount: acc.totalDiscount + item.discountAmount,
+        netBilling: acc.netBilling + item.totalAmount,
+        totalReceived: acc.totalReceived + item.amountReceived,
+        totalDue: acc.totalDue + item.balance,
+      }),
+      {
+        grossBilling: 0,
+        totalDiscount: 0,
+        netBilling: 0,
+        totalReceived: 0,
+        totalDue: 0,
+      },
+    );
 
-      const expenses = await prisma.expense.findMany({
-        where: {
-          userId,
-          expenseDate: { gte: start, lt: end },
-        },
-        orderBy: [{ expenseDate: "desc" }, { createdAt: "desc" }],
-        select: {
-          id: true,
-          title: true,
-          amount: true,
-          category: true,
-          notes: true,
-          expenseDate: true,
-        },
-      });
+    return {
+      dateKey,
+      totalCases: cases.length,
+      ...totals,
+      cases,
+    };
+  },
+});
 
-      const items = expenses.map((expense) => ({
-        id: expense.id,
-        title: expense.title,
-        amount: expense.amount.toNumber(),
-        category: expense.category,
-        notes: expense.notes,
-        expenseDate: expense.expenseDate.toISOString(),
-      }));
+export const fetchDailyExpenses = createCachedQueryFn({
+  getKeyParts: (userId: string, dateKey: string) => [
+    "daily-expenses",
+    userId,
+    dateKey,
+  ],
+  getTags: (userId: string, dateKey: string) => [
+    cacheTags.expenses(userId, dateKey),
+  ],
+  profile: "live",
+  fn: async (
+    userId: string,
+    dateKey: string,
+  ): Promise<DailyExpensesData> => {
+    const { start, end } = getDayBounds(dateKey);
 
-      const totalSpent = items.reduce((sum, item) => sum + item.amount, 0);
-      const totalEntries = items.length;
-      const largestExpense =
-        items.length > 0
-          ? Math.max(...items.map((item) => item.amount))
-          : 0;
-      const averageExpense =
-        totalEntries > 0 ? totalSpent / totalEntries : 0;
+    const expenses = await prisma.expense.findMany({
+      where: {
+        userId,
+        expenseDate: { gte: start, lt: end },
+      },
+      orderBy: [{ expenseDate: "desc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        title: true,
+        amount: true,
+        category: true,
+        notes: true,
+        expenseDate: true,
+      },
+    });
 
-      const categoryMap = new Map<ExpenseCategory, ExpenseCategoryTotal>();
+    const items = expenses.map((expense) => ({
+      id: expense.id,
+      title: expense.title,
+      amount: expense.amount.toNumber(),
+      category: expense.category,
+      notes: expense.notes,
+      expenseDate: expense.expenseDate.toISOString(),
+    }));
 
-      for (const item of items) {
-        const existing = categoryMap.get(item.category);
-        if (existing) {
-          existing.amount += item.amount;
-          existing.count += 1;
-        } else {
-          categoryMap.set(item.category, {
-            category: item.category,
-            label: expenseCategoryLabels[item.category],
-            amount: item.amount,
-            count: 1,
-          });
-        }
+    const totalSpent = items.reduce((sum, item) => sum + item.amount, 0);
+    const totalEntries = items.length;
+    const largestExpense =
+      items.length > 0 ? Math.max(...items.map((item) => item.amount)) : 0;
+    const averageExpense = totalEntries > 0 ? totalSpent / totalEntries : 0;
+
+    const categoryMap = new Map<ExpenseCategory, ExpenseCategoryTotal>();
+
+    for (const item of items) {
+      const existing = categoryMap.get(item.category);
+      if (existing) {
+        existing.amount += item.amount;
+        existing.count += 1;
+      } else {
+        categoryMap.set(item.category, {
+          category: item.category,
+          label: expenseCategoryLabels[item.category],
+          amount: item.amount,
+          count: 1,
+        });
       }
+    }
 
-      const categoryBreakdown = Array.from(categoryMap.values()).sort(
-        (a, b) => b.amount - a.amount,
-      );
+    const categoryBreakdown = Array.from(categoryMap.values()).sort(
+      (a, b) => b.amount - a.amount,
+    );
 
-      const topCategory = categoryBreakdown[0] ?? null;
+    const topCategory = categoryBreakdown[0] ?? null;
 
-      return {
-        dateKey,
-        totalSpent,
-        totalEntries,
-        largestExpense,
-        topCategory: topCategory?.category ?? null,
-        topCategoryAmount: topCategory?.amount ?? 0,
-        averageExpense,
-        categoryBreakdown,
-        expenses: items,
-      };
-    },
-    ["daily-expenses", userId, dateKey],
-    {
-      tags: [cacheTags.expenses(userId, dateKey)],
-      revalidate: 30,
-    },
-  )(),
-);
+    return {
+      dateKey,
+      totalSpent,
+      totalEntries,
+      largestExpense,
+      topCategory: topCategory?.category ?? null,
+      topCategoryAmount: topCategory?.amount ?? 0,
+      averageExpense,
+      categoryBreakdown,
+      expenses: items,
+    };
+  },
+});
 
-export const fetchPatientReportById = cache(
-  async (reportId: string, userId: string) => {
+export const fetchPatientReportById = createCachedQueryFn({
+  getKeyParts: (reportId: string, userId: string) => [
+    "patient-report",
+    reportId,
+    userId,
+  ],
+  getTags: (reportId: string, userId: string) => [
+    cacheTags.patientReport(reportId),
+    cacheTags.patientReports(userId),
+  ],
+  profile: "entity",
+  fn: async (reportId: string, userId: string) => {
     const report = await prisma.patientReport.findFirst({
       where: { id: reportId, userId },
       include: {
@@ -482,25 +487,47 @@ export const fetchPatientReportById = cache(
 
     return report ? serializeDecimal(report) : null;
   },
-);
-
-export const fetchPatientById = cache(async (patientId: string, userId: string) => {
-  const patient = await prisma.patient.findUnique({
-    where: { id: patientId, userId },
-    include: {
-      reports: {
-        include: { testGroups: true },
-        take: 1,
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
-
-  return patient ? serializeDecimal(patient) : null;
 });
 
-export const fetchTestGroupById = cache(
-  async (testGroupId: string, userId: string) => {
+export const fetchPatientById = createCachedQueryFn({
+  getKeyParts: (patientId: string, userId: string) => [
+    "patient",
+    patientId,
+    userId,
+  ],
+  getTags: (patientId: string, userId: string) => [
+    cacheTags.patient(patientId),
+    cacheTags.patientReports(userId),
+  ],
+  profile: "entity",
+  fn: async (patientId: string, userId: string) => {
+    const patient = await prisma.patient.findUnique({
+      where: { id: patientId, userId },
+      include: {
+        reports: {
+          include: { testGroups: true },
+          take: 1,
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    return patient ? serializeDecimal(patient) : null;
+  },
+});
+
+export const fetchTestGroupById = createCachedQueryFn({
+  getKeyParts: (testGroupId: string, userId: string) => [
+    "test-group",
+    testGroupId,
+    userId,
+  ],
+  getTags: (testGroupId: string, userId: string) => [
+    cacheTags.testGroup(testGroupId),
+    cacheTags.testGroups(userId),
+  ],
+  profile: "entity",
+  fn: async (testGroupId: string, userId: string) => {
     const group = await prisma.testGroup.findFirst({
       where: { id: testGroupId, userId },
       include: {
@@ -512,4 +539,4 @@ export const fetchTestGroupById = cache(
 
     return group ? serializeDecimal(group) : null;
   },
-);
+});

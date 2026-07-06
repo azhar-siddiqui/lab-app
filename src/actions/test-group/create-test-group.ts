@@ -6,8 +6,7 @@ import {
   testGroupFormSchema,
   TestGroupFormValuesType,
 } from "@/validation/test-group";
-import { cacheTags } from "@/lib/cache-tags";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { invalidateLabData } from "@/lib/invalidate-lab-cache";
 import { unauthorized } from "next/navigation";
 
 export async function CreateTestGroup(
@@ -52,9 +51,10 @@ export async function CreateTestGroup(
     },
   });
 
-  revalidateTag(cacheTags.testGroups(user.id), "max");
-  revalidatePath("/patients/new");
-  revalidatePath("/test");
+  invalidateLabData(user.id, {
+    includeCatalog: true,
+    paths: ["/patients/new", "/test"],
+  });
   return {
     status: "success",
     message: "Test Group Created Successfully",

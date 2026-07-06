@@ -9,8 +9,8 @@ import {
   PatientFormValuesType,
 } from "@/validation/patientform";
 
-import { cacheTags } from "@/lib/cache-tags";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { toDateKey } from "@/lib/daily-business";
+import { invalidateLabData } from "@/lib/invalidate-lab-cache";
 import { unauthorized } from "next/navigation";
 
 export async function UpdatePatient(
@@ -124,10 +124,12 @@ export async function UpdatePatient(
       reportId = report.id;
     });
 
-    revalidateTag(cacheTags.patientReports(session.user.id), "max");
-    revalidatePath("/patients");
-    revalidatePath("/dashboard/business/daily");
-    revalidatePath("/dashboard/overview");
+    invalidateLabData(session.user.id, {
+      patientId,
+      reportId,
+      dateKeys: [toDateKey(data.date)],
+      paths: ["/patients", "/dashboard/business/daily", "/dashboard/overview"],
+    });
 
     return {
       status: "success",

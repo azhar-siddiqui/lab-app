@@ -7,8 +7,7 @@ import {
   reportSchema,
 } from "@/validation/patient-report-form";
 import { getServerSession } from "@/lib/get-session";
-import { cacheTags } from "@/lib/cache-tags";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { invalidateLabData } from "@/lib/invalidate-lab-cache";
 
 export async function SavePatientReport(
   values: ReportFormValues,
@@ -33,9 +32,10 @@ export async function SavePatientReport(
 
     const session = await getServerSession();
     if (session?.user) {
-      revalidateTag(cacheTags.patientReports(session.user.id), "max");
+      invalidateLabData(session.user.id, {
+        paths: ["/patients", "/dashboard/overview"],
+      });
     }
-    revalidatePath("/patients");
     return { status: "success", message: "Report saved successfully" };
   } catch (error) {
     console.error(error);

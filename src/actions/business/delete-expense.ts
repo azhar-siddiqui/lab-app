@@ -1,11 +1,11 @@
 "use server";
 
-import { cacheTags } from "@/lib/cache-tags";
 import { toDateKey } from "@/lib/daily-business";
+import { invalidateLabData } from "@/lib/invalidate-lab-cache";
 import { getServerSession } from "@/lib/get-session";
 import prisma from "@/lib/prisma";
 import { ApiResponse } from "@/lib/types";
-import { revalidatePath, revalidateTag } from "next/cache";
+
 import { unauthorized } from "next/navigation";
 
 export async function deleteExpense(expenseId: string): Promise<ApiResponse> {
@@ -26,11 +26,10 @@ export async function deleteExpense(expenseId: string): Promise<ApiResponse> {
     where: { id: expenseId },
   });
 
-  revalidateTag(
-    cacheTags.expenses(user.id, toDateKey(existing.expenseDate)),
-    "max",
-  );
-  revalidatePath("/dashboard/business/expenses");
+  invalidateLabData(user.id, {
+    dateKeys: [toDateKey(existing.expenseDate)],
+    paths: ["/dashboard/business/expenses"],
+  });
 
   return {
     status: "success",
