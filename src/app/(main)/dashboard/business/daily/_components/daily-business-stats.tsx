@@ -86,7 +86,8 @@ export function DailyBusinessStats({
           : "No billing recorded",
       icon: HandCoins,
       badge: `${collectionRate}%`,
-      badgeVariant: collectionRate >= 100 ? ("default" as const) : ("outline" as const),
+      badgeVariant:
+        collectionRate >= 100 ? ("default" as const) : ("outline" as const),
     },
     {
       label: "Outstanding",
@@ -100,7 +101,8 @@ export function DailyBusinessStats({
       footer: "Balance pending from patients",
       icon: Wallet,
       badge: totalDue > 0 ? "Due pending" : "Fully collected",
-      badgeVariant: totalDue > 0 ? ("destructive" as const) : ("outline" as const),
+      badgeVariant:
+        totalDue > 0 ? ("destructive" as const) : ("outline" as const),
     },
   ];
 

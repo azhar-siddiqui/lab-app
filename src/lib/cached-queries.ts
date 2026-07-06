@@ -4,6 +4,12 @@ import {
   getDiscountAmount,
   getGrossAmount,
 } from "@/lib/daily-business";
+import {
+  DailyExpensesData,
+  expenseCategoryLabels,
+  type ExpenseCategoryTotal,
+} from "@/lib/expenses";
+import { ExpenseCategory } from "@/generated/prisma/enums";
 import { serializeDecimal } from "@/lib/fomat-price";
 import { cacheTags } from "@/lib/cache-tags";
 import prisma from "@/lib/prisma";
@@ -362,6 +368,88 @@ export const fetchDailyBusiness = cache((userId: string, dateKey: string) =>
         cacheTags.dailyBusiness(userId, dateKey),
         cacheTags.patientReports(userId),
       ],
+      revalidate: 30,
+    },
+  )(),
+);
+
+export const fetchDailyExpenses = cache((userId: string, dateKey: string) =>
+  unstable_cache(
+    async (): Promise<DailyExpensesData> => {
+      const { start, end } = getDayBounds(dateKey);
+
+      const expenses = await prisma.expense.findMany({
+        where: {
+          userId,
+          expenseDate: { gte: start, lt: end },
+        },
+        orderBy: [{ expenseDate: "desc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          title: true,
+          amount: true,
+          category: true,
+          notes: true,
+          expenseDate: true,
+        },
+      });
+
+      const items = expenses.map((expense) => ({
+        id: expense.id,
+        title: expense.title,
+        amount: expense.amount.toNumber(),
+        category: expense.category,
+        notes: expense.notes,
+        expenseDate: expense.expenseDate.toISOString(),
+      }));
+
+      const totalSpent = items.reduce((sum, item) => sum + item.amount, 0);
+      const totalEntries = items.length;
+      const largestExpense =
+        items.length > 0
+          ? Math.max(...items.map((item) => item.amount))
+          : 0;
+      const averageExpense =
+        totalEntries > 0 ? totalSpent / totalEntries : 0;
+
+      const categoryMap = new Map<ExpenseCategory, ExpenseCategoryTotal>();
+
+      for (const item of items) {
+        const existing = categoryMap.get(item.category);
+        if (existing) {
+          existing.amount += item.amount;
+          existing.count += 1;
+        } else {
+          categoryMap.set(item.category, {
+            category: item.category,
+            label: expenseCategoryLabels[item.category],
+            amount: item.amount,
+            count: 1,
+          });
+        }
+      }
+
+      const categoryBreakdown = Array.from(categoryMap.values()).sort(
+        (a, b) => b.amount - a.amount,
+      );
+
+      const topCategory = categoryBreakdown[0] ?? null;
+
+      return {
+        dateKey,
+        totalSpent,
+        totalEntries,
+        largestExpense,
+        topCategory: topCategory?.category ?? null,
+        topCategoryAmount: topCategory?.amount ?? 0,
+        averageExpense,
+        categoryBreakdown,
+        expenses: items,
+      };
+    },
+    ["daily-expenses", userId, dateKey],
+    {
+      tags: [cacheTags.expenses(userId, dateKey)],
       revalidate: 30,
     },
   )(),

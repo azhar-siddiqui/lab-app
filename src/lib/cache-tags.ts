@@ -7,4 +7,6 @@ export const cacheTags = {
   dashboardStats: (userId: string) => `dashboard-stats:${userId}`,
   dailyBusiness: (userId: string, dateKey: string) =>
     `daily-business:${userId}:${dateKey}`,
+  expenses: (userId: string, dateKey: string) =>
+    `expenses:${userId}:${dateKey}`,
 } as const;
