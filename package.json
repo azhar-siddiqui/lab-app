@@ -10,7 +10,9 @@
     "lint": "eslint",
     "seed": "pnpm tsx prisma/seed.ts",
     "db:migrate": "prisma migrate deploy",
-    "db:migrate:prod": "sh -c 'set -a; [ -f .env.production ] && . ./.env.production; set +a; prisma migrate deploy'"
+    "db:migrate:prod": "sh -c 'set -a; [ -f .env.production ] && . ./.env.production; set +a; prisma migrate deploy'",
+    "db:prod:reset": "sh -c 'set -a; [ -f .env.production ] && . ./.env.production; set +a; prisma db execute --file prisma/scripts/reset-public-schema.sql'",
+    "db:prod:setup": "pnpm db:prod:reset && pnpm db:migrate:prod"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
