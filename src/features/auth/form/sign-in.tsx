@@ -31,7 +31,6 @@ const formSchema = z.object({
     .max(100, "Password must be at most 100 characters."),
   rememberMe: z.boolean().optional(),
 });
-const TEP_PASSWORD = "Admin@1234";
 
 type SignInValues = z.infer<typeof formSchema>;
 
@@ -41,8 +40,8 @@ export default function SignInForm() {
   const form = useForm<SignInValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "azhar1@medicare.com",
-      password: TEP_PASSWORD,
+      email: "",
+      password: "",
       rememberMe: false,
     },
   });
