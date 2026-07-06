@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Control, Controller, useForm } from "react-hook-form";
 
 import {
   Accordion,
@@ -38,6 +38,35 @@ import { toast } from "sonner";
 
 interface ResultFormProps {
   report: GetPatientReportByIdType;
+}
+
+function ResultValueInput({
+  control,
+  fieldIndex,
+}: {
+  control: Control<ReportFormValues>;
+  fieldIndex: number;
+}) {
+  return (
+    <Controller
+      control={control}
+      name={`tests.${fieldIndex}.resultValue`}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <div>
+            <Input
+              {...field}
+              aria-invalid={fieldState.invalid}
+              autoComplete="off"
+              placeholder="Enter result"
+            />
+          </div>
+
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+        </Field>
+      )}
+    />
+  );
 }
 
 export function ResultForm({ report }: Readonly<ResultFormProps>) {
@@ -96,23 +125,23 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   }
 
   return (
-    <div>
+    <div className="w-full min-w-0">
       <div className="mx-auto space-y-4">
         <Card className="rounded-lg border-none shadow-sm">
-          <CardContent>
+          <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10">
+              <div className="min-w-0">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
                     <FlaskConical className="size-5" />
                   </div>
 
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="max-w-full truncate">
                     Laboratory Information System
                   </Badge>
                 </div>
 
-                <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+                <h1 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
                   Patient Report Entry
                 </h1>
 
@@ -122,42 +151,44 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
+              <div className="grid w-full min-w-0 grid-cols-1 gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2 lg:max-w-xl lg:grid-cols-3">
+                <div className="min-w-0">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Patient
                   </p>
 
-                  <div className="mt-1 flex items-center gap-2 font-medium">
-                    <UserRound className="size-4" />
-                    {report.patient.name}
+                  <div className="mt-1 flex min-w-0 items-center gap-2 font-medium">
+                    <UserRound className="size-4 shrink-0" />
+                    <span className="truncate">{report.patient.name}</span>
                   </div>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Age / Gender
                   </p>
 
-                  <p className="mt-1 font-medium">
+                  <p className="mt-1 truncate font-medium">
                     {`${report.patient.age} ${report.patient.ageType} / ${report.patient.gender}`}
                   </p>
                 </div>
 
-                <div>
+                <div className="min-w-0 sm:col-span-2 lg:col-span-1">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Ref. Doctor
                   </p>
 
-                  <p className="mt-1 font-medium">{report.doctor.name}</p>
+                  <p className="mt-1 truncate font-medium">
+                    {report.doctor.name}
+                  </p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-          <Card className="rounded-lg border-none shadow-sm lg:sticky lg:top-6 lg:h-fit">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,320px)_1fr]">
+          <Card className="hidden rounded-lg border-none shadow-sm lg:block lg:sticky lg:top-6 lg:h-fit">
             <CardContent className="p-4">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -213,11 +244,11 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
             </CardContent>
           </Card>
 
-          <div>
+          <div className="min-w-0">
             <form
               id="patient-report-form"
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4"
+              className="space-y-4 pb-20 md:pb-0"
             >
               <Accordion
                 value={[activeGroup.id]}
@@ -232,31 +263,31 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                   <AccordionItem
                     key={group.id}
                     value={group.id}
-                    className="bg-card overflow-hidden rounded-lg shadow-sm border"
+                    className="overflow-hidden rounded-lg border bg-card shadow-sm"
                   >
-                    <AccordionTrigger className="px-6 py-5 hover:no-underline">
-                      <div className="flex items-center gap-3 text-left">
-                        <div className="flex size-8 items-center justify-center rounded-xl bg-primary/10">
+                    <AccordionTrigger className="px-4 py-4 hover:no-underline sm:px-6 sm:py-5">
+                      <div className="flex min-w-0 items-center gap-3 text-left">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                           <FlaskConical className="size-4" />
                         </div>
 
-                        <div>
-                          <h2 className="font-semibold capitalize">
+                        <div className="min-w-0">
+                          <h2 className="truncate font-semibold capitalize">
                             {group.testGroup.name}
                           </h2>
 
                           <p className="text-sm text-muted-foreground">
-                            {hasExistingResults ? "Update" : "Enter"} Patient
+                            {hasExistingResults ? "Update" : "Enter"} patient
                             test result values.
                           </p>
                         </div>
                       </div>
                     </AccordionTrigger>
 
-                    <AccordionContent>
+                    <AccordionContent className="p-0">
                       <div className="overflow-x-auto">
-                        <div className="min-w-190">
-                          <div className="grid grid-cols-12 border-y bg-muted/20 px-6 py-4 text-sm font-semibold">
+                        <div className="min-w-0 md:min-w-190">
+                          <div className="hidden border-y bg-muted/20 px-4 py-4 text-sm font-semibold md:grid md:grid-cols-12 sm:px-6">
                             <div className="col-span-4">Parameter</div>
 
                             <div className="col-span-3">Result</div>
@@ -272,45 +303,40 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                             return (
                               <div
                                 key={test.id}
-                                className="grid grid-cols-12 items-center border-b px-6 py-4 last:border-none"
+                                className="border-b px-4 py-4 last:border-none sm:px-6 md:grid md:grid-cols-12 md:items-center"
                               >
-                                <div className="col-span-4">
+                                <div className="min-w-0 md:col-span-4 md:pr-2">
                                   <p className="font-medium">
                                     {test.test.name}
                                   </p>
                                 </div>
 
-                                <div className="col-span-3 pr-4">
-                                  <Controller
+                                <div className="mt-3 md:col-span-3 md:mt-0 md:pr-4">
+                                  <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground md:sr-only">
+                                    Result
+                                  </p>
+                                  <ResultValueInput
                                     control={form.control}
-                                    name={`tests.${fieldIndex}.resultValue`}
-                                    render={({ field, fieldState }) => (
-                                      <Field data-invalid={fieldState.invalid}>
-                                        <div>
-                                          <Input
-                                            {...field}
-                                            aria-invalid={fieldState.invalid}
-                                            autoComplete="off"
-                                            placeholder="Enter result"
-                                          />
-                                        </div>
-
-                                        {fieldState.invalid && (
-                                          <FieldError
-                                            errors={[fieldState.error]}
-                                          />
-                                        )}
-                                      </Field>
-                                    )}
+                                    fieldIndex={fieldIndex}
                                   />
                                 </div>
 
-                                <div className="col-span-2 text-center text-sm text-muted-foreground">
-                                  {test.test.testUnit.name}
+                                <div className="mt-3 md:col-span-2 md:mt-0 md:text-center">
+                                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground md:sr-only">
+                                    Unit
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {test.test.testUnit.name}
+                                  </p>
                                 </div>
 
-                                <div className="col-span-3 text-sm text-muted-foreground">
-                                  {test.test.normalValueMale}
+                                <div className="mt-3 md:col-span-3 md:mt-0">
+                                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground md:sr-only">
+                                    Reference Range
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {test.test.normalValueMale}
+                                  </p>
                                 </div>
                               </div>
                             );
@@ -322,12 +348,13 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                 ))}
               </Accordion>
 
-              <div className="sticky bottom-4 flex justify-end rounded-lg bg-card p-4 backdrop-blur border">
+              <div className="fixed inset-x-0 bottom-0 z-10 border-t bg-card/95 p-4 backdrop-blur md:static md:inset-auto md:flex md:justify-end md:rounded-lg md:border">
                 <Button
                   form="patient-report-form"
                   type="submit"
                   size="lg"
                   disabled={pending}
+                  className="w-full md:ml-auto md:w-auto"
                 >
                   {pending ? (
                     <>
