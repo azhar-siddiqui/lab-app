@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
+import { getDatabaseUrl } from "./database-url";
 
 const globalForPrisma = global as unknown as {
   prisma?: PrismaClient;
@@ -7,7 +8,7 @@ const globalForPrisma = global as unknown as {
 };
 
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: getDatabaseUrl(),
 });
 
 // Bust the dev-time singleton when the schema changes so new columns are picked up
