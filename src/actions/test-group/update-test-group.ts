@@ -10,7 +10,8 @@ import {
   testGroupFormSchema,
   TestGroupFormValuesType,
 } from "@/validation/test-group";
-import { revalidatePath } from "next/cache";
+import { cacheTags } from "@/lib/cache-tags";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function UpdateTestGroup(
   testGroupId: string,
@@ -106,6 +107,7 @@ export async function UpdateTestGroup(
       }
     });
 
+    revalidateTag(cacheTags.testGroups(session.user.id), "max");
     revalidatePath("/test");
 
     return {

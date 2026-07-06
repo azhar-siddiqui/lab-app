@@ -6,6 +6,8 @@ import {
   patientFormSchema,
   PatientFormValuesType,
 } from "@/validation/patientform";
+import { cacheTags } from "@/lib/cache-tags";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { unauthorized } from "next/navigation";
 
 export async function CreatePatient(
@@ -86,6 +88,9 @@ export async function CreatePatient(
       }
       return { patientId: patient.id, reportId: report.id };
     });
+
+    revalidateTag(cacheTags.patientReports(user.id), "max");
+    revalidatePath("/patients");
 
     return {
       status: "success",

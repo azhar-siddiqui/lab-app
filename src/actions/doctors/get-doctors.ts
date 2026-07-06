@@ -1,24 +1,16 @@
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { headers } from "next/headers";
+"use server";
 
-export async function GetDoctor() {
-  const session = await auth.api.getSession({
-    headers: await headers(), // Pass headers for session detection
-  });
+import { fetchDoctors } from "@/lib/cached-queries";
+import { getServerSession } from "@/lib/get-session";
+import { unauthorized } from "next/navigation";
+import { cache } from "react";
 
-  const data = await prisma.doctor.findMany({
-    where: {
-      userId: session?.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-      specialization: true,
-    },
-  });
+export const GetDoctor = cache(async () => {
+  const session = await getServerSession();
+  const user = session?.user;
+  if (!user) return unauthorized();
 
-  return data;
-}
+  return fetchDoctors(user.id);
+});
 
 export type DoctorType = Awaited<ReturnType<typeof GetDoctor>>[0];

@@ -1,47 +1,23 @@
 "use server";
 
-import { serializeDecimal } from "@/lib/fomat-price";
-import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { fetchPatientReportById } from "@/lib/cached-queries";
+import { getServerSession } from "@/lib/get-session";
+import { notFound, unauthorized } from "next/navigation";
+import { cache } from "react";
 
-export async function GetPatientReportById(reportId: string) {
-  const report = await prisma.patientReport.findUnique({
-    where: {
-      id: reportId,
-    },
+export const GetPatientReportById = cache(async (reportId: string) => {
+  const session = await getServerSession();
+  const user = session?.user;
+  if (!user) return unauthorized();
 
-    include: {
-      patient: true,
-      doctor: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      testGroups: {
-        include: {
-          testGroup: {
-            include: { testCategory: true },
-          },
-          tests: {
-            orderBy: {
-              test: {
-                position: "asc",
-              },
-            },
-            include: { test: { include: { testUnit: true } } },
-          },
-        },
-      },
-    },
-  });
+  const report = await fetchPatientReportById(reportId, user.id);
 
   if (!report) {
     return notFound();
   }
 
-  return serializeDecimal(report);
-}
+  return report;
+});
 
 export type GetPatientReportByIdType = Awaited<
   ReturnType<typeof GetPatientReportById>

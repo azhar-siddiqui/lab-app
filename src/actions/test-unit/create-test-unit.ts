@@ -3,7 +3,8 @@
 import { getServerSession } from "@/lib/get-session";
 import prisma from "@/lib/prisma";
 import { UnitFormValuesType, unitFromSchema } from "@/validation/test-group";
-import { revalidatePath } from "next/cache";
+import { cacheTags } from "@/lib/cache-tags";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { unauthorized } from "next/navigation";
 
 export async function CreatTestUnit(value: UnitFormValuesType) {
@@ -27,6 +28,7 @@ export async function CreatTestUnit(value: UnitFormValuesType) {
     },
   });
 
+  revalidateTag(cacheTags.testUnits(user.id), "max");
   revalidatePath("/test/new");
 
   return {

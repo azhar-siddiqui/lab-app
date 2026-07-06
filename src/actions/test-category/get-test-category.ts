@@ -1,22 +1,16 @@
 "use server";
 
+import { fetchTestCategories } from "@/lib/cached-queries";
 import { getServerSession } from "@/lib/get-session";
-import prisma from "@/lib/prisma";
 import { unauthorized } from "next/navigation";
+import { cache } from "react";
 
-export async function GetTestCategory() {
+export const GetTestCategory = cache(async () => {
   const session = await getServerSession();
   const user = session?.user;
   if (!user) return unauthorized();
 
-  const data = await prisma.testCategory.findMany({
-    where: {
-      userId: user.id,
-    },
-    select: { id: true, name: true, description: true },
-  });
-
-  return data;
-}
+  return fetchTestCategories(user.id);
+});
 
 export type TestCategoryType = Awaited<ReturnType<typeof GetTestCategory>>[0];

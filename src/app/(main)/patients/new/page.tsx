@@ -4,8 +4,11 @@ import PageContainer from "@/components/layout/page-container";
 import { PatientRegistrationForm } from "./_components/patient-registration-form";
 
 export default async function PatientRegistrationPage() {
-  const doctors = await GetDoctor();
-  const testGroups = await GetTestGroup();
+  const [doctors, testGroups] = await Promise.all([
+    GetDoctor(),
+    GetTestGroup(),
+  ]);
+
   return (
     <PageContainer>
       <PatientRegistrationForm doctors={doctors} testGroups={testGroups} />

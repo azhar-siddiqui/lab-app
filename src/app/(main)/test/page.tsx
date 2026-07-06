@@ -1,19 +1,17 @@
-import { GetTestGroup } from "@/actions/test-group/get-test-group";
-import { DataTable } from "@/components/data-table/data-table";
 import PageContainer from "@/components/layout/page-container";
+import { TablePageSkeleton } from "@/components/skeletons/page-skeletons";
 import { buttonVariants } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { testGroupColumns } from "./_components/columns";
+import { Suspense } from "react";
+import { TestTableSection } from "./_components/test-table-section";
 
-export default async function TestPage() {
-  const testGroups = await GetTestGroup();
-
+export default function TestPage() {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight flex-1">
+          <h2 className="flex-1 text-2xl font-bold tracking-tight">
             Test database
           </h2>
           <div className="flex items-center gap-x-2">
@@ -33,19 +31,15 @@ export default async function TestPage() {
             </Link>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-4">
+        <p className="text-muted-foreground mt-4 text-sm">
           <b>Important:</b> It is required that your laboratory proofreads and
           updates the provided reference range before using it for printing lab
           reports.
         </p>
 
-        <DataTable
-          data={testGroups}
-          columns={testGroupColumns}
-          searchKeys={["name", "shortName"]}
-          searchPlaceholder="Search Test Group"
-          dateFilterKey="createdAt"
-        />
+        <Suspense fallback={<TablePageSkeleton rows={8} columns={5} />}>
+          <TestTableSection />
+        </Suspense>
       </div>
     </PageContainer>
   );

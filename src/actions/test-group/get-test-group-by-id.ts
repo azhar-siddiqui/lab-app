@@ -1,38 +1,22 @@
 "use server";
 
-import prisma from "@/lib/prisma";
-
+import { fetchTestGroupById } from "@/lib/cached-queries";
 import { getServerSession } from "@/lib/get-session";
-
-import { serializeDecimal } from "@/lib/fomat-price";
 import { notFound, unauthorized } from "next/navigation";
+import { cache } from "react";
 
-export async function GetTestGroupById(testGroupId: string) {
+export const GetTestGroupById = cache(async (testGroupId: string) => {
   const session = await getServerSession();
+  const user = session?.user;
+  if (!user) return unauthorized();
 
-  if (!session?.user) {
-    return unauthorized();
+  const group = await fetchTestGroupById(testGroupId, user.id);
+
+  if (!group) {
+    return notFound();
   }
 
-  const group = await prisma.testGroup.findFirst({
-    where: {
-      id: testGroupId,
-
-      userId: session.user.id,
-    },
-
-    include: {
-      tests: {
-        orderBy: {
-          position: "asc",
-        },
-      },
-    },
-  });
-
-  if (!group) return notFound();
-
-  return serializeDecimal(group);
-}
+  return group;
+});
 
 export type TestGroupByIdType = Awaited<ReturnType<typeof GetTestGroupById>>;

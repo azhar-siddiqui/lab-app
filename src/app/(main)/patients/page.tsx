@@ -1,18 +1,17 @@
-import { GetPatientReports } from "@/actions/patient-report/get-all-patient-report";
-import { DataTable } from "@/components/data-table/data-table";
 import PageContainer from "@/components/layout/page-container";
+import { TablePageSkeleton } from "@/components/skeletons/page-skeletons";
 import { buttonVariants } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { columns } from "./_components/colums";
+import { Suspense } from "react";
+import { PatientsTableSection } from "./_components/patients-table-section";
 
-export default async function PatientsPage() {
-  const reports = await GetPatientReports();
+export default function PatientsPage() {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight flex-1">
+          <h2 className="flex-1 text-2xl font-bold tracking-tight">
             Patients database
           </h2>
           <Link
@@ -23,19 +22,15 @@ export default async function PatientsPage() {
             Add new
           </Link>
         </div>
-        <p className="text-sm text-muted-foreground mt-4">
+        <p className="text-muted-foreground mt-4 text-sm">
           <b>Important:</b> It is required that your laboratory proofreads and
           updates the provided reference range before using it for printing lab
           reports.
         </p>
 
-        <DataTable
-          data={reports}
-          columns={columns}
-          searchKeys={["patient.name"]}
-          searchPlaceholder="Search patient..."
-          dateFilterKey="reportDate"
-        />
+        <Suspense fallback={<TablePageSkeleton rows={8} columns={7} />}>
+          <PatientsTableSection />
+        </Suspense>
       </div>
     </PageContainer>
   );

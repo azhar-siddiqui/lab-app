@@ -7,7 +7,8 @@ import {
   doctorFormSchema,
   DoctorFormValuesTypes,
 } from "@/validation/doctorform";
-import { revalidatePath } from "next/cache";
+import { cacheTags } from "@/lib/cache-tags";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { unauthorized } from "next/navigation";
 
 export async function CreateDoctor(
@@ -37,6 +38,7 @@ export async function CreateDoctor(
     },
   });
 
+  revalidateTag(cacheTags.doctors(user.id), "max");
   revalidatePath("/patients/new");
 
   return {

@@ -1,38 +1,16 @@
 "use server";
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { headers } from "next/headers";
 
-export async function GetTestGroup() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+import { fetchTestGroups } from "@/lib/cached-queries";
+import { getServerSession } from "@/lib/get-session";
+import { unauthorized } from "next/navigation";
+import { cache } from "react";
 
-  const data = await prisma.testGroup.findMany({
-    where: {
-      userId: session?.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-      shortName: true,
-      price: true,
-      testCategory: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      createdAt: true,
-    },
-  });
+export const GetTestGroup = cache(async () => {
+  const session = await getServerSession();
+  const user = session?.user;
+  if (!user) return unauthorized();
 
-  return data.map((item) => ({
-    ...item,
-
-    // ✅ Convert Decimal → number
-    price: item.price.toNumber(),
-  }));
-}
+  return fetchTestGroups(user.id);
+});
 
 export type TestGroupType = Awaited<ReturnType<typeof GetTestGroup>>[0];
