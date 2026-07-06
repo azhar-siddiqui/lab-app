@@ -18,7 +18,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { formatINR } from "./format-inr";
+import { formatINR } from "@/lib/format-inr";
 import { QuickActions } from "./quick-actions";
 import { StatCards } from "./stat-cards";
 

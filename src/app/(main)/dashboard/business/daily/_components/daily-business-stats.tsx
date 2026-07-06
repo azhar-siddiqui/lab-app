@@ -1,17 +1,12 @@
 "use client";
 
-import { AnimatedNumber } from "@/app/(main)/dashboard/overview/_components/animated-number";
-import { Badge } from "@/components/ui/badge";
+import { AnimatedNumber } from "@/components/dashboard/animated-number";
 import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  StatCardsGrid,
+  type StatCardConfig,
+} from "@/components/dashboard/stat-cards-grid";
 import type { DailyBusinessData } from "@/lib/daily-business";
-import { formatINR } from "@/lib/format-inr";
+import { formatAnimatedINR, formatINR } from "@/lib/format-inr";
 import {
   ClipboardList,
   HandCoins,
@@ -27,12 +22,6 @@ type DailyBusinessStatsProps = Pick<
   totalDiscount: number;
 };
 
-function formatAnimatedINR(amount: number, target: number) {
-  const rounded = Math.round(amount);
-  const useCompact = rounded >= target && target >= 1_000;
-  return formatINR(rounded, useCompact);
-}
-
 export function DailyBusinessStats({
   totalCases,
   grossBilling,
@@ -44,7 +33,7 @@ export function DailyBusinessStats({
   const collectionRate =
     netBilling > 0 ? Math.round((totalReceived / netBilling) * 100) : 0;
 
-  const cards = [
+  const cards: StatCardConfig[] = [
     {
       label: "Total cases",
       value: (
@@ -106,27 +95,5 @@ export function DailyBusinessStats({
     },
   ];
 
-  return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:shadow-xs sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card) => (
-        <Card key={card.label} className="@container/card">
-          <CardHeader>
-            <CardDescription>{card.label}</CardDescription>
-            <CardTitle className="text-2xl font-semibold @[250px]/card:text-3xl">
-              {card.value}
-            </CardTitle>
-            <CardAction>
-              <Badge variant={card.badgeVariant ?? "outline"}>
-                <card.icon className="size-3.5" />
-                {card.badge}
-              </Badge>
-            </CardAction>
-          </CardHeader>
-          <CardFooter className="text-muted-foreground text-sm">
-            {card.footer}
-          </CardFooter>
-        </Card>
-      ))}
-    </div>
-  );
+  return <StatCardsGrid cards={cards} />;
 }

@@ -1,6 +1,6 @@
-import type { DailyBusinessData } from "@/lib/daily-business";
+import { DateToolbar } from "@/components/dashboard/date-toolbar";
+import { type DailyBusinessData, toDateKey } from "@/lib/daily-business";
 import { DailyBusinessStats } from "./daily-business-stats";
-import { DailyBusinessToolbar } from "./daily-business-toolbar";
 import { DailyCasesList } from "./daily-cases-list";
 import { DailySummaryPanel } from "./daily-summary-panel";
 
@@ -11,7 +11,11 @@ type DailyBusinessViewProps = {
 export function DailyBusinessView({ data }: DailyBusinessViewProps) {
   return (
     <div className="flex flex-1 flex-col space-y-6">
-      <DailyBusinessToolbar dateKey={data.dateKey} />
+      <DateToolbar
+        dateKey={data.dateKey}
+        label="Reporting date"
+        todayKey={toDateKey(new Date())}
+      />
 
       <DailyBusinessStats
         totalCases={data.totalCases}

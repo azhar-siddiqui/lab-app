@@ -18,27 +18,36 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-type DailyBusinessToolbarProps = {
+type DateToolbarProps = {
   dateKey: string;
+  label: string;
+  todayKey: string;
   compact?: boolean;
 };
 
-export function DailyBusinessToolbar({
+export function DateToolbar({
   dateKey,
+  label,
+  todayKey,
   compact = false,
-}: DailyBusinessToolbarProps) {
+}: DateToolbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const selectedDate = parseDateKey(dateKey);
-  const isToday = dateKey === toDateKey(new Date());
+  const [isToday, setIsToday] = useState(dateKey === todayKey);
+
+  useEffect(() => {
+    setIsToday(dateKey === toDateKey(new Date()));
+  }, [dateKey, todayKey]);
 
   const navigate = (nextDateKey: string) => {
     router.push(`${pathname}?date=${nextDateKey}`);
   };
 
   const controls = (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex items-center justify-end gap-2">
       <Button
         type="button"
         variant="outline"
@@ -56,7 +65,7 @@ export function DailyBusinessToolbar({
               variant="outline"
               className={cn(
                 "justify-start gap-2 font-normal",
-                compact ? "min-w-[180px]" : "min-w-[200px] w-full sm:w-auto",
+                compact ? "min-w-45" : "min-w-50",
               )}
             >
               <CalendarIcon className="size-4" />
@@ -103,12 +112,12 @@ export function DailyBusinessToolbar({
 
   return (
     <Card className="gap-0 py-0">
-      <CardContent className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <div className="space-y-0.5">
+      <CardContent className="flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-5">
+        <div className="min-w-0 space-y-0.5">
           <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-            Reporting date
+            {label}
           </p>
-          <p className="font-heading text-base font-semibold">
+          <p className="font-heading truncate text-base font-semibold">
             {formatDisplayDate(dateKey)}
           </p>
         </div>

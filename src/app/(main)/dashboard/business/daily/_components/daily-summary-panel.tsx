@@ -1,3 +1,4 @@
+import { SummaryRow } from "@/components/dashboard/summary-row";
 import {
   Card,
   CardContent,
@@ -19,31 +20,6 @@ type DailySummaryPanelProps = Pick<
   | "totalReceived"
   | "totalDue"
 >;
-
-function SummaryRow({
-  label,
-  value,
-  emphasis = false,
-}: {
-  label: string;
-  value: string;
-  emphasis?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-2.5">
-      <span className="text-muted-foreground text-sm">{label}</span>
-      <span
-        className={
-          emphasis
-            ? "font-heading text-base font-semibold tabular-nums"
-            : "text-sm font-medium tabular-nums"
-        }
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
 
 export function DailySummaryPanel({
   totalCases,

@@ -1,5 +1,6 @@
+import { DateToolbar } from "@/components/dashboard/date-toolbar";
+import { toDateKey } from "@/lib/daily-business";
 import type { DailyExpensesData } from "@/lib/expenses";
-import { ExpensesDateToolbar } from "./expenses-date-toolbar";
 import { ExpensesList } from "./expenses-list";
 import { ExpensesStats } from "./expenses-stats";
 import { ExpensesSummaryPanel } from "./expenses-summary-panel";
@@ -11,7 +12,11 @@ type ExpensesViewProps = {
 export function ExpensesView({ data }: ExpensesViewProps) {
   return (
     <div className="flex flex-1 flex-col space-y-6">
-      <ExpensesDateToolbar dateKey={data.dateKey} />
+      <DateToolbar
+        dateKey={data.dateKey}
+        label="Expense date"
+        todayKey={toDateKey(new Date())}
+      />
 
       <ExpensesStats
         totalSpent={data.totalSpent}

@@ -13,3 +13,9 @@ export function formatINR(amount: number, compact = false): string {
     maximumFractionDigits: 2,
   })}`;
 }
+
+export function formatAnimatedINR(amount: number, target: number) {
+  const rounded = Math.round(amount);
+  const useCompact = rounded >= target && target >= 1_000;
+  return formatINR(rounded, useCompact);
+}

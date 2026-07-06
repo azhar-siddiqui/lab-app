@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 export type DailyBusinessCase = {
   id: string;
   patientId: string;
@@ -58,12 +60,7 @@ export function getGrossAmount(netAmount: number, discountPercent: number) {
 }
 
 export function formatDisplayDate(dateKey: string) {
-  return parseDateKey(dateKey).toLocaleDateString("en-IN", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return format(parseDateKey(dateKey), "EEE, d MMM, yyyy");
 }
 
 export function shiftDateKey(dateKey: string, days: number) {
