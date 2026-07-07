@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { tryCatch } from "@/utils/try-catch";
 import { UnitFormValuesType, unitFromSchema } from "@/validation/test-group";
@@ -90,12 +90,15 @@ export function UnitForm() {
                   <FieldLabel htmlFor="unit">Unit</FieldLabel>
                   <Input
                     id="unit"
-                    placeholder={fieldState.error?.message ?? "Enter unit"}
+                    placeholder="e.g. g/dL"
                     {...field}
                     aria-invalid={fieldState.invalid}
                     autoComplete="off"
                     autoFocus
                   />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />

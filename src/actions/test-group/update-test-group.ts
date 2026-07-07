@@ -83,6 +83,7 @@ export async function UpdateTestGroup(
             data: {
               position: index + 1,
               name: row.testName,
+              fullName: row.fullName?.trim() || null,
               testUnitId: row.unit,
               normalValueMale: row.normalMale,
               normalValueFemale: row.normalFemale,
@@ -95,6 +96,7 @@ export async function UpdateTestGroup(
           data: {
             position: index + 1,
             name: row.testName,
+            fullName: row.fullName?.trim() || null,
             testUnitId: row.unit,
             normalValueMale: row.normalMale,
             normalValueFemale: row.normalFemale,

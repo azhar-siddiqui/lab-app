@@ -1,8 +1,11 @@
 import z from "zod";
 
 export const testGroupFormSchema = z.object({
-  testGroupName: z.string().min(2, { message: "Patient name required" }).trim(),
-  shortName: z.string().min(2, { message: "Short name required" }).trim(),
+  testGroupName: z
+    .string()
+    .min(2, { message: "Test group name is required" })
+    .trim(),
+  shortName: z.string().min(2, { message: "Short name is required" }).trim(),
   category: z.uuid(),
   price: z
     .string({ message: "Price required" })
@@ -15,8 +18,9 @@ export const testGroupFormSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        testName: z.string().min(1, { message: "Test name required" }),
-        unit: z.string().min(1),
+        testName: z.string().min(1, { message: "Short name is required" }),
+        fullName: z.string().trim().optional(),
+        unit: z.string().min(1, { message: "Unit is required" }),
         normalMale: z
           .string()
           .min(1, { message: "Enter valid range (e.g. 10-20)" }),

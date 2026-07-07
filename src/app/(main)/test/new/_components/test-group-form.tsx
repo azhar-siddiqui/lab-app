@@ -16,7 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -71,6 +71,7 @@ export function TestGroupForm({
           ? testGroup.tests.map((test) => ({
               id: test.id,
               testName: test.name,
+              fullName: test.fullName ?? "",
               unit: test.testUnitId,
               normalMale: test.normalValueMale,
               normalFemale: test.normalValueFemale,
@@ -79,6 +80,7 @@ export function TestGroupForm({
           : [
               {
                 testName: "",
+                fullName: "",
                 unit: "",
                 normalMale: "",
                 normalFemale: "",
@@ -139,14 +141,15 @@ export function TestGroupForm({
                 <FieldLabel htmlFor="testGroupName">Test Group Name</FieldLabel>
                 <Input
                   id="testGroupName"
-                  placeholder={
-                    fieldState.error?.message ?? "Enter Test Group Name"
-                  }
+                  placeholder="e.g. Complete Blood Count"
                   {...field}
                   aria-invalid={fieldState.invalid}
                   autoComplete="off"
                   autoFocus
                 />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -161,11 +164,14 @@ export function TestGroupForm({
                 <FieldLabel htmlFor="shortName">Short Name</FieldLabel>
                 <Input
                   id="shortName"
-                  placeholder={fieldState.error?.message ?? "Enter Short Name"}
+                  placeholder="e.g. CBC"
                   {...field}
                   aria-invalid={fieldState.invalid}
                   autoComplete="off"
                 />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -203,7 +209,7 @@ export function TestGroupForm({
                             </span>
                           ) : (
                             <span className="text-muted-foreground">
-                              Select Category
+                              Select category
                             </span>
                           )}
                           <ChevronsUpDownIcon
@@ -245,6 +251,9 @@ export function TestGroupForm({
                       </Command>
                     </PopoverContent>
                   </Popover>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               );
             }}
@@ -262,10 +271,13 @@ export function TestGroupForm({
                   {...field}
                   id="form-price"
                   aria-invalid={fieldState.invalid}
-                  placeholder={fieldState.error?.message ?? "Enter Price"}
+                  placeholder="e.g. 500"
                   autoComplete="off"
                   type="number"
                 />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -298,6 +310,7 @@ export function TestGroupForm({
             onClick={() =>
               append({
                 testName: "",
+                fullName: "",
                 unit: "",
                 normalMale: "",
                 normalFemale: "",
@@ -317,7 +330,7 @@ export function TestGroupForm({
               <div className="flex justify-center items-center border border-input rounded-lg px-3 h-8 bg-input/30 self-start mt-6 lg:self-end">
                 {index + 1}
               </div>
-              <div className="grid gap-4 grid-cols-12 flex-1">
+              <div className="grid flex-1 grid-cols-12 gap-4">
                 <Controller
                   name={`testRows.${index}.testName`}
                   control={form.control}
@@ -327,20 +340,47 @@ export function TestGroupForm({
                       className="col-span-12 md:col-span-6 lg:col-span-3"
                     >
                       <FieldLabel htmlFor={`testRows.${index}.testName`}>
-                        Test Name
+                        Short Name
                       </FieldLabel>
                       <Input
                         id={`testRows.${index}.testName`}
-                        placeholder={fieldState.error?.message ?? "Test Name"}
+                        placeholder="e.g. HGB"
                         {...field}
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
                   )}
                 />
 
-                {/* Unit */}
+                <Controller
+                  name={`testRows.${index}.fullName`}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="col-span-12 md:col-span-6 lg:col-span-5"
+                    >
+                      <FieldLabel htmlFor={`testRows.${index}.fullName`}>
+                        Full Name
+                      </FieldLabel>
+                      <Input
+                        id={`testRows.${index}.fullName`}
+                        placeholder="e.g. Hemoglobin"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
                 <Controller
                   name={`testRows.${index}.unit`}
                   control={form.control}
@@ -356,53 +396,56 @@ export function TestGroupForm({
                   )}
                 />
 
-                {/* Normal Male */}
                 <Controller
                   name={`testRows.${index}.normalMale`}
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field
                       data-invalid={fieldState.invalid}
-                      className="col-span-12 md:col-span-6 lg:col-span-2"
+                      className="col-span-12 md:col-span-6 lg:col-span-3"
                     >
                       <FieldLabel htmlFor={`testRows.${index}.normalMale`}>
                         Normal Value (Male)
                       </FieldLabel>
                       <Input
                         id={`testRows.${index}.normalMale`}
-                        placeholder={fieldState.error?.message ?? "10 - 20"}
+                        placeholder="e.g. 13 - 17"
                         {...field}
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
                   )}
                 />
 
-                {/* Normal Female */}
                 <Controller
                   name={`testRows.${index}.normalFemale`}
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field
                       data-invalid={fieldState.invalid}
-                      className="col-span-12 md:col-span-6 lg:col-span-2"
+                      className="col-span-12 md:col-span-6 lg:col-span-3"
                     >
                       <FieldLabel htmlFor={`testRows.${index}.normalFemale`}>
                         Normal Value (Female)
                       </FieldLabel>
                       <Input
                         id={`testRows.${index}.normalFemale`}
-                        placeholder={fieldState.error?.message ?? "10 - 20"}
+                        placeholder="e.g. 12 - 15"
                         {...field}
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
                   )}
                 />
 
-                {/* Optional Checkbox */}
                 <Controller
                   name={`testRows.${index}.optional`}
                   control={form.control}
@@ -410,7 +453,7 @@ export function TestGroupForm({
                     <Field
                       data-invalid={fieldState.invalid}
                       orientation="horizontal"
-                      className="self-end border px-2 h-8 rounded-lg has-data-[state=checked]:bg-input/30 has-data-[state=checked]:text-foreground  has-data-[state=checked]:z-10 col-span-12 md:col-span-6 lg:col-span-2"
+                      className="col-span-12 h-8 self-end rounded-lg border px-2 has-data-[state=checked]:z-10 has-data-[state=checked]:bg-input/30 has-data-[state=checked]:text-foreground md:col-span-6 lg:col-span-2"
                     >
                       <Checkbox
                         id={`testRows.${index}.optional`}
@@ -425,7 +468,6 @@ export function TestGroupForm({
                   )}
                 />
 
-                {/* Remove Button */}
                 <Button
                   type="button"
                   variant="outline"
@@ -536,7 +578,7 @@ function UnitCombobox({
               {selectedUnit ? (
                 <span className="truncate">{selectedUnit.name}</span>
               ) : (
-                <span className="text-muted-foreground">Select Unit</span>
+                <span className="text-muted-foreground">Select unit</span>
               )}
 
               <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -559,6 +601,7 @@ function UnitCombobox({
           </Command>
         </PopoverContent>
       </Popover>
+      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
 }

@@ -41,6 +41,7 @@ export async function CreateTestGroup(
         create: result.data.testRows.map((test, index) => ({
           position: index + 1,
           name: test.testName,
+          fullName: test.fullName?.trim() || null,
           normalValueMale: test.normalMale,
           normalValueFemale: test.normalFemale,
           isOptionalTest: test.optional,
