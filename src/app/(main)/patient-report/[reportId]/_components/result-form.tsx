@@ -13,12 +13,12 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { GetPatientReportByIdType } from "@/actions/patient-report/get-patient-report";
+import { SavePatientReport } from "@/actions/patient-report/save-patient-report";
 import {
   getReferenceRange,
   getTestStatus,
   type TestStatus,
 } from "@/lib/report-range";
-import { SavePatientReport } from "@/actions/patient-report/save-patient-report";
 import { cn } from "@/lib/utils";
 import { tryCatch } from "@/utils/try-catch";
 import {
@@ -110,6 +110,7 @@ function ResultValueInput({
               aria-invalid={fieldState.invalid}
               autoComplete="off"
               placeholder="Enter result"
+              autoFocus={true}
               className={cn(
                 "h-9 font-mono text-sm",
                 !fieldState.invalid && cfg.inputClass,
@@ -520,8 +521,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   const overallPct =
     totalTests > 0 ? Math.round((totalFilled / totalTests) * 100) : 0;
 
-  const isAllGroupsComplete =
-    totalTests > 0 && totalFilled === totalTests;
+  const isAllGroupsComplete = totalTests > 0 && totalFilled === totalTests;
 
   function getFieldIndex(testId: string) {
     return form.getValues("tests").findIndex((item) => item.id === testId);
@@ -566,7 +566,11 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
       (group) => group.id === activeGroupId,
     );
 
-    for (let index = currentIndex + 1; index < report.testGroups.length; index++) {
+    for (
+      let index = currentIndex + 1;
+      index < report.testGroups.length;
+      index++
+    ) {
       const group = report.testGroups[index];
       const stats = groupStats[group.id];
 
@@ -700,10 +704,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
         </div>
 
         <div className="min-w-0 @3xl:col-span-8">
-          <form
-            id="patient-report-form"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
+          <form id="patient-report-form" onSubmit={form.handleSubmit(onSubmit)}>
             <TestGroupDetailForm
               group={activeGroup}
               report={report}
