@@ -269,6 +269,8 @@ function TestGroupDetailForm({
   getLiveStatus,
   hasExistingResults,
   pending,
+  isAllGroupsComplete,
+  onNext,
 }: {
   group: GetPatientReportByIdType["testGroups"][number];
   report: GetPatientReportByIdType;
@@ -277,6 +279,8 @@ function TestGroupDetailForm({
   getLiveStatus: (testId: string) => TestStatus | "empty";
   hasExistingResults: boolean;
   pending: boolean;
+  isAllGroupsComplete: boolean;
+  onNext: () => void;
 }) {
   const filledCount = group.tests.filter(
     (test) => getLiveStatus(test.id) !== "empty",
@@ -410,21 +414,42 @@ function TestGroupDetailForm({
 
       <div className="sticky bottom-4 mx-4 mb-4 mt-2 flex flex-col gap-3 rounded-xl border bg-card/95 px-4 py-3.5 shadow-md backdrop-blur-sm sm:mx-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          {hasExistingResults ? "Update" : "Save"} all results to continue to
-          preview.
+          {isAllGroupsComplete
+            ? `All parameters filled. ${hasExistingResults ? "Update" : "Save"} to continue to preview.`
+            : isComplete
+              ? "This group is complete. Continue to the next test group."
+              : "Fill all parameters in this group to continue."}
         </p>
-        <Button type="submit" size="lg" disabled={pending} className="sm:w-auto">
-          {pending ? (
-            <>
-              Saving... <Loader className="animate-spin" />
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="mr-2 size-5" />
-              {hasExistingResults ? "Update & Preview" : "Save & Preview"}
-            </>
-          )}
-        </Button>
+        {isAllGroupsComplete ? (
+          <Button
+            type="submit"
+            size="lg"
+            disabled={pending}
+            className="sm:w-auto"
+          >
+            {pending ? (
+              <>
+                Saving... <Loader className="animate-spin" />
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="mr-2 size-5" />
+                {hasExistingResults ? "Update & Preview" : "Save & Preview"}
+              </>
+            )}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            size="lg"
+            disabled={pending}
+            className="sm:w-auto"
+            onClick={onNext}
+          >
+            Next
+            <ChevronRight className="ml-2 size-5" />
+          </Button>
+        )}
       </div>
     </Card>
   );
@@ -495,6 +520,9 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   const overallPct =
     totalTests > 0 ? Math.round((totalFilled / totalTests) * 100) : 0;
 
+  const isAllGroupsComplete =
+    totalTests > 0 && totalFilled === totalTests;
+
   function getFieldIndex(testId: string) {
     return form.getValues("tests").findIndex((item) => item.id === testId);
   }
@@ -519,6 +547,46 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
         report.patient.gender,
       ) ?? "empty"
     );
+  }
+
+  async function handleNext() {
+    if (!activeGroup) return;
+
+    const fieldNames = activeGroup.tests.map(
+      (test) => `tests.${getFieldIndex(test.id)}.resultValue` as const,
+    );
+    const isCurrentGroupValid = await form.trigger(fieldNames);
+
+    if (!isCurrentGroupValid) {
+      toast.error("Please fill all parameters in this group");
+      return;
+    }
+
+    const currentIndex = report.testGroups.findIndex(
+      (group) => group.id === activeGroupId,
+    );
+
+    for (let index = currentIndex + 1; index < report.testGroups.length; index++) {
+      const group = report.testGroups[index];
+      const stats = groupStats[group.id];
+
+      if (stats.filled < stats.total) {
+        setActiveGroupId(group.id);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+
+    for (let index = 0; index < currentIndex; index++) {
+      const group = report.testGroups[index];
+      const stats = groupStats[group.id];
+
+      if (stats.filled < stats.total) {
+        setActiveGroupId(group.id);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
   }
 
   function onSubmit(values: ReportFormValues) {
@@ -644,6 +712,8 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
               getLiveStatus={getLiveStatus}
               hasExistingResults={hasExistingResults}
               pending={pending}
+              isAllGroupsComplete={isAllGroupsComplete}
+              onNext={handleNext}
             />
           </form>
         </div>

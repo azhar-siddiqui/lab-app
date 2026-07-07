@@ -1,5 +1,7 @@
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { MarketingNav } from "@/components/marketing/marketing-nav";
+import { getServerSession } from "@/lib/get-session";
+import { getPostAuthRedirect } from "@/lib/onboarding";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -18,12 +20,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function MarketingLayout({
+export default async function MarketingLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getServerSession();
+  const user = session?.user;
+  const dashboardHref = user ? getPostAuthRedirect(user) : null;
+
   return (
     <div className="flex min-h-screen flex-col">
-      <MarketingNav />
+      <MarketingNav dashboardHref={dashboardHref} />
       <main className="flex-1">{children}</main>
       <MarketingFooter />
     </div>

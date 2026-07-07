@@ -48,7 +48,7 @@ export default async function DashboardLayout({
       <SidebarProvider defaultOpen={defaultOpen}>
         <InfobarProvider defaultOpen={false}>
           <AppSidebar user={user} />
-          <SidebarInset>
+          <SidebarInset className="min-w-0">
             <Header />
             {children}
           </SidebarInset>

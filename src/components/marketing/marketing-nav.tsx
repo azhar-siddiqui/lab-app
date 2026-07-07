@@ -12,9 +12,13 @@ import {
 } from "@/components/ui/sheet";
 import { ThemeModeToggle } from "@/theme/theme-mode-toggle";
 import { cn } from "@/lib/utils";
-import { Menu } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+type MarketingNavProps = {
+  dashboardHref?: string | null;
+};
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -24,7 +28,45 @@ const navLinks = [
   { label: "FAQ", href: "#faq" },
 ];
 
-export function MarketingNav() {
+function AuthActions({
+  dashboardHref,
+  className,
+}: {
+  dashboardHref?: string | null;
+  className?: string;
+}) {
+  if (dashboardHref) {
+    return (
+      <div className={cn("flex items-center gap-2", className)}>
+        <Link
+          href={dashboardHref}
+          className={buttonVariants({ size: "sm", className: "gap-2" })}
+        >
+          Go to dashboard
+          <ArrowRight className="size-4" />
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      <Link
+        href="/auth/sign-in"
+        className={buttonVariants({ variant: "ghost", size: "sm" })}
+      >
+        Sign in
+      </Link>
+      <Link href="/auth/sign-up" className={buttonVariants({ size: "sm" })}>
+        Get started
+      </Link>
+    </div>
+  );
+}
+
+export function MarketingNav({
+  dashboardHref = null,
+}: Readonly<MarketingNavProps>) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -61,18 +103,7 @@ export function MarketingNav() {
 
         <div className="hidden items-center gap-2 md:flex">
           <ThemeModeToggle />
-          <Link
-            href="/auth/sign-in"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/auth/sign-up"
-            className={buttonVariants({ size: "sm" })}
-          >
-            Get started
-          </Link>
+          <AuthActions dashboardHref={dashboardHref} />
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
@@ -107,23 +138,39 @@ export function MarketingNav() {
                 ))}
               </nav>
               <div className="mt-6 flex flex-col gap-2">
-                <SheetClose
-                  render={
-                    <Link
-                      href="/auth/sign-in"
-                      className={buttonVariants({ variant: "outline" })}
-                    />
-                  }
-                >
-                  Sign in
-                </SheetClose>
-                <SheetClose
-                  render={
-                    <Link href="/auth/sign-up" className={buttonVariants()} />
-                  }
-                >
-                  Get started
-                </SheetClose>
+                {dashboardHref ? (
+                  <SheetClose
+                    render={
+                      <Link
+                        href={dashboardHref}
+                        className={buttonVariants({ className: "gap-2" })}
+                      />
+                    }
+                  >
+                    Go to dashboard
+                    <ArrowRight className="size-4" />
+                  </SheetClose>
+                ) : (
+                  <>
+                    <SheetClose
+                      render={
+                        <Link
+                          href="/auth/sign-in"
+                          className={buttonVariants({ variant: "outline" })}
+                        />
+                      }
+                    >
+                      Sign in
+                    </SheetClose>
+                    <SheetClose
+                      render={
+                        <Link href="/auth/sign-up" className={buttonVariants()} />
+                      }
+                    >
+                      Get started
+                    </SheetClose>
+                  </>
+                )}
               </div>
             </SheetContent>
           </Sheet>
