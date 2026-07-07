@@ -10,7 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Gender } from "@/generated/prisma/enums";
+import {
+  getReferenceRange,
+  getTestStatus,
+  type TestStatus,
+} from "@/lib/report-range";
 import React from "react";
 
 const TABLE_COLS = [
@@ -20,37 +24,17 @@ const TABLE_COLS = [
   { label: "Reference Range", cls: "w-[30%] text-center" },
 ] as const;
 
-type TestStatus = "high" | "low" | "normal";
-
 const ROW_CLS: Record<TestStatus, string> = {
   high: "bg-red-50 hover:bg-red-50",
   low: "bg-orange-50 hover:bg-orange-50",
   normal: "hover:bg-slate-50",
 };
 
-function getStatus(value: number, low: number, high: number): TestStatus {
-  if (value > high) return "high";
-  if (value < low) return "low";
-  return "normal";
-}
-
 const VALUE_CLS: Record<TestStatus, string> = {
   high: "text-red-700",
   low: "text-orange-700",
   normal: "text-slate-800",
 };
-
-function parseNormalRange(rangeStr: string): { low: number; high: number } {
-  if (!rangeStr) return { low: 0, high: 999999 };
-
-  const numbers = rangeStr.match(/\d+/g);
-  if (!numbers) return { low: 0, high: 999999 };
-
-  return {
-    low: Number.parseFloat(numbers[0]),
-    high: Number.parseFloat(numbers.at(-1) ?? "0"),
-  };
-}
 
 interface ReportProps {
   testGroupItem: TestGroupItemType;
@@ -117,12 +101,19 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
               )}
               {tests.map((item) => {
                 const test = item.test;
-                const resultValue = Number.parseFloat(item.resultValue ?? "");
-                const { low, high } = parseNormalRange(
-                  test.normalValueMale || test.normalValueFemale || "",
-                );
-                const status = getStatus(resultValue, low, high);
+                const status =
+                  getTestStatus(
+                    item.resultValue,
+                    test.normalValueMale,
+                    test.normalValueFemale,
+                    pataient.gender,
+                  ) ?? "normal";
                 const unit = test.testUnit?.name || "";
+                const referenceRange = getReferenceRange(
+                  test.normalValueMale,
+                  test.normalValueFemale,
+                  pataient.gender,
+                );
 
                 return (
                   <TableRow
@@ -164,9 +155,7 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
 
                     {/* Reference range */}
                     <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
-                      {pataient.gender === Gender.Male
-                        ? test.normalValueMale
-                        : test.normalValueFemale}
+                      {referenceRange}
                     </TableCell>
                   </TableRow>
                 );

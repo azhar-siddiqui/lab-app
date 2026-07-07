@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { GetPatientReportByIdType } from "@/actions/patient-report/get-patient-report";
+import { getReferenceRange } from "@/lib/report-range";
 import { SavePatientReport } from "@/actions/patient-report/save-patient-report";
 import { tryCatch } from "@/utils/try-catch";
 import {
@@ -335,7 +336,11 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
                                     Reference Range
                                   </p>
                                   <p className="text-sm text-muted-foreground">
-                                    {test.test.normalValueMale}
+                                    {getReferenceRange(
+                                      test.test.normalValueMale,
+                                      test.test.normalValueFemale,
+                                      report.patient.gender,
+                                    )}
                                   </p>
                                 </div>
                               </div>
