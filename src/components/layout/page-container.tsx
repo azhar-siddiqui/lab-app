@@ -55,7 +55,7 @@ export default function PageContainer({
   const hasHeader = pageTitle || pageHeaderAction;
 
   const inner = (
-    <div className="flex flex-1 flex-col p-4 md:px-6">
+    <div className="flex min-w-0 flex-1 flex-col p-4 md:px-6">
       {hasHeader && (
         <div className="bg-background sticky top-0 z-10 mb-4 flex items-start justify-between gap-4 pb-4">
           <Heading

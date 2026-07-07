@@ -255,62 +255,147 @@ export function TestGroupFormSkeleton() {
 
 export function ReportEntrySkeleton() {
   return (
-    <div className="mx-auto space-y-4">
-      <div className="rounded-lg border-none bg-card shadow-sm ring-1 ring-foreground/10">
-        <div className="p-6">
+    <div className="@container mx-auto w-full min-w-0 max-w-7xl space-y-4 overflow-x-hidden">
+      {/* Header card */}
+      <div className="overflow-hidden rounded-xl border-none bg-card shadow-sm ring-1 ring-foreground/10">
+        <Skeleton className="h-1 w-full rounded-none" />
+        <div className="p-4 sm:p-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
+            <div className="min-w-0 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <Skeleton className="size-10 rounded-2xl" />
                 <Skeleton className="h-5 w-44 rounded-full" />
               </div>
-              <Skeleton className="h-8 w-56" />
-              <Skeleton className="h-4 w-72" />
+              <Skeleton className="h-7 w-56 sm:h-8" />
+              <Skeleton className="h-4 w-72 max-w-full" />
             </div>
-            <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2 lg:grid-cols-3">
+
+            <div className="grid w-full min-w-0 grid-cols-1 gap-4 rounded-xl border bg-muted/20 p-4 sm:grid-cols-2 lg:max-w-xl lg:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3 w-16" />
+                <div
+                  key={i}
+                  className={cn("min-w-0 space-y-2", i === 2 && "sm:col-span-2 lg:col-span-1")}
+                >
+                  <Skeleton className="h-3 w-20" />
                   <Skeleton className="h-5 w-28" />
                 </div>
               ))}
             </div>
           </div>
+
+          <div className="mt-5 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-3 w-36" />
+            </div>
+            <Skeleton className="h-1.5 w-full rounded-full" />
+          </div>
         </div>
       </div>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,320px)_1fr]">
-        <div className="hidden rounded-lg bg-card p-4 ring-1 ring-foreground/10 lg:block">
-          <div className="mb-4 flex items-center justify-between">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-5 w-16 rounded-full" />
-          </div>
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-lg border p-4">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="mt-2 h-4 w-24" />
+      {/* Main grid: test groups + detail form */}
+      <div className="grid min-w-0 grid-cols-1 gap-4 @3xl:grid-cols-12 @3xl:gap-6">
+        {/* Test group sidebar */}
+        <div className="min-w-0 @3xl:col-span-4">
+          <div className="@3xl:sticky @3xl:top-6">
+            <div className="overflow-hidden rounded-xl border-none bg-card shadow-sm ring-1 ring-foreground/10">
+              <div className="flex items-center justify-between border-b px-4 py-3.5">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-5 w-16 rounded-full" />
               </div>
-            ))}
+
+              <div className="space-y-1.5 p-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "rounded-xl border p-3.5",
+                      i === 0 ? "border-primary/40 bg-primary/5 shadow-sm" : "border-transparent",
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="size-8 shrink-0 rounded-lg" />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-3 w-8" />
+                        </div>
+                        <Skeleton className="h-1 w-full rounded-full" />
+                      </div>
+                      <Skeleton className="size-4 shrink-0 rounded-sm" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="min-w-0 space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="space-y-3 rounded-lg border px-4 py-4"
-            >
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-8 w-full rounded-lg" />
-              <div className="grid grid-cols-2 gap-3">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-24" />
+        {/* Detail form */}
+        <div className="min-w-0 @3xl:col-span-8">
+          <div className="min-w-0 overflow-hidden rounded-xl border-none bg-card shadow-sm ring-1 ring-foreground/10">
+            <div className="border-b bg-muted/20 px-4 py-4 sm:px-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <Skeleton className="size-9 shrink-0 rounded-xl" />
+                  <div className="min-w-0 space-y-2">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </div>
+                <Skeleton className="h-5 w-20 rounded-full" />
               </div>
             </div>
-          ))}
-          <div className="flex justify-end pt-2">
-            <Skeleton className="h-10 w-full rounded-lg sm:h-9 sm:w-36" />
+
+            <div className="min-w-0 overflow-x-auto">
+              <div className="min-w-0 @3xl:min-w-full">
+                <div className="hidden border-b bg-muted/30 px-4 py-3 @3xl:grid @3xl:grid-cols-12 sm:px-6">
+                  <Skeleton className="col-span-4 h-3 w-20" />
+                  <Skeleton className="col-span-3 h-3 w-14" />
+                  <Skeleton className="col-span-2 mx-auto h-3 w-10" />
+                  <Skeleton className="col-span-2 h-3 w-20" />
+                  <Skeleton className="col-span-1 mx-auto h-3 w-12" />
+                </div>
+
+                <div className="divide-y">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="px-4 py-4 sm:px-6 @3xl:grid @3xl:grid-cols-12 @3xl:items-center @3xl:py-3.5"
+                    >
+                      <div className="min-w-0 @3xl:col-span-4 @3xl:pr-3">
+                        <Skeleton className="h-4 w-36" />
+                      </div>
+
+                      <div className="mt-3 space-y-1.5 @3xl:col-span-3 @3xl:mt-0 @3xl:pr-4">
+                        <Skeleton className="h-3 w-12 @3xl:hidden" />
+                        <Skeleton className="h-9 w-full rounded-lg" />
+                      </div>
+
+                      <div className="mt-3 space-y-1.5 @3xl:col-span-2 @3xl:mt-0 @3xl:text-center">
+                        <Skeleton className="mx-0 h-3 w-10 @3xl:mx-auto @3xl:hidden" />
+                        <Skeleton className="h-4 w-12 @3xl:mx-auto" />
+                      </div>
+
+                      <div className="mt-3 space-y-1.5 @3xl:col-span-2 @3xl:mt-0">
+                        <Skeleton className="h-3 w-24 @3xl:hidden" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+
+                      <div className="mt-3 @3xl:col-span-1 @3xl:mt-0 @3xl:flex @3xl:justify-center">
+                        <Skeleton className="h-3 w-12 @3xl:hidden" />
+                        <Skeleton className="mt-1.5 h-5 w-16 rounded-full @3xl:mt-0" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-4 mx-4 mb-4 mt-2 flex flex-col gap-3 rounded-xl border bg-card/95 px-4 py-3.5 shadow-md backdrop-blur-sm sm:mx-6 sm:flex-row sm:items-center sm:justify-between">
+              <Skeleton className="h-4 w-56 max-w-full" />
+              <Skeleton className="h-10 w-full rounded-lg sm:w-40" />
+            </div>
           </div>
         </div>
       </div>
