@@ -525,9 +525,14 @@ function UnitOptions({
   return (
     <CommandGroup heading="Units">
       {units.map((unit) => (
-        <CommandItem key={unit.id} value={unit.id} onSelect={onSelect}>
+        <CommandItem
+          key={unit.id}
+          value={unit.name}
+          keywords={[unit.name]}
+          onSelect={() => onSelect(unit.id)}
+        >
           {unit.name}
-          {value === unit.name && <CheckIcon size={16} className="ml-auto" />}
+          {value === unit.id && <CheckIcon size={16} className="ml-auto" />}
         </CommandItem>
       ))}
     </CommandGroup>
@@ -586,7 +591,10 @@ function UnitCombobox({
           }
         />
 
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent
+          className="border-input w-full min-w-(--radix-popper-anchor-width) p-0"
+          align="start"
+        >
           <Command>
             <CommandInput placeholder="Search Unit..." />
             <CommandList>

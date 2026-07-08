@@ -16,12 +16,13 @@ import { tryCatch } from "@/utils/try-catch";
 import { UnitFormValuesType, unitFromSchema } from "@/validation/test-group";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader, SaveIcon } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export function UnitForm() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [pending, startTransition] = useTransition();
 
@@ -48,6 +49,7 @@ export function UnitForm() {
         toast.success(result.message);
         form.reset();
         setIsOpen(false);
+        router.refresh();
       } else if (result?.status === "error") {
         toast.error(result.message);
       }
