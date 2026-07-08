@@ -124,13 +124,15 @@ export default function SignInForm() {
               <Field data-invalid={fieldState.invalid}>
                 <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="h-auto px-0 text-xs"
+                  <Link
+                    href="/auth/forgot-password"
+                    className={cn(
+                      buttonVariants({ variant: "link" }),
+                      "h-auto px-0 text-xs",
+                    )}
                   >
                     Forgot password?
-                  </Button>
+                  </Link>
                 </div>
                 <PasswordInput
                   {...field}

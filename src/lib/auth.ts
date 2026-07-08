@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { getAppUrl, getTrustedOrigins } from "./app-url";
 import prisma from "./prisma";
 import { seedDefaultLabData } from "./seed-default-lab-data";
+import { sendAuthResetPasswordEmail } from "./send-reset-password-email";
 import { sendAuthVerificationEmail } from "./send-verification-email";
 
 export const auth = betterAuth({
@@ -13,6 +14,22 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      try {
+        await sendAuthResetPasswordEmail({
+          email: user.email,
+          name: user.name,
+          url,
+        });
+      } catch (error) {
+        console.error(
+          `[email] Failed to send password reset email to ${user.email}:`,
+          error,
+        );
+        throw error;
+      }
+    },
   },
   emailVerification: {
     sendOnSignUp: false,
