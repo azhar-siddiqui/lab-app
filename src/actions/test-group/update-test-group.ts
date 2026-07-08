@@ -11,6 +11,10 @@ import {
   TestGroupFormValuesType,
 } from "@/validation/test-group";
 import { invalidateLabData } from "@/lib/invalidate-lab-cache";
+import {
+  normalizeTestRowForSave,
+  resolveTestUnitId,
+} from "@/lib/normalize-test-row";
 
 export async function UpdateTestGroup(
   testGroupId: string,
@@ -69,6 +73,21 @@ export async function UpdateTestGroup(
       }
 
       for (const [index, row] of data.testRows.entries()) {
+        const normalized = normalizeTestRowForSave(row);
+        const testUnitId = await resolveTestUnitId(
+          session.user.id,
+          normalized.unit,
+        );
+        const testData = {
+          position: index + 1,
+          name: normalized.testName,
+          fullName: normalized.fullName?.trim() || null,
+          testUnitId,
+          normalValueMale: normalized.normalMale,
+          normalValueFemale: normalized.normalFemale,
+          isOptionalTest: normalized.optional ?? false,
+        };
+
         if (row.id) {
           const existingTest = await tx.test.findFirst({
             where: { id: row.id, userId: session.user.id, testGroupId },
@@ -80,27 +99,14 @@ export async function UpdateTestGroup(
 
           await tx.test.update({
             where: { id: row.id },
-            data: {
-              position: index + 1,
-              name: row.testName,
-              fullName: row.fullName?.trim() || null,
-              testUnitId: row.unit,
-              normalValueMale: row.normalMale,
-              normalValueFemale: row.normalFemale,
-              isOptionalTest: row.optional,
-            },
+            data: testData,
           });
           continue;
         }
+
         await tx.test.create({
           data: {
-            position: index + 1,
-            name: row.testName,
-            fullName: row.fullName?.trim() || null,
-            testUnitId: row.unit,
-            normalValueMale: row.normalMale,
-            normalValueFemale: row.normalFemale,
-            isOptionalTest: row.optional,
+            ...testData,
             testGroupId,
             userId: session.user.id,
           },

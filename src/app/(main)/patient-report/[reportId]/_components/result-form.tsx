@@ -44,6 +44,17 @@ interface ResultFormProps {
 
 type GroupStats = Record<string, { filled: number; total: number }>;
 
+type ReportTestItem =
+  GetPatientReportByIdType["testGroups"][number]["tests"][number];
+
+function isReportEntryTest(test: ReportTestItem) {
+  return !test.test.isOptionalTest;
+}
+
+function getEntryTests(tests: ReportTestItem[]) {
+  return tests.filter(isReportEntryTest);
+}
+
 const STATUS_CONFIG: Record<
   TestStatus | "empty",
   {
@@ -178,7 +189,7 @@ function TestGroupList({
               const isActive = group.id === activeGroupId;
               const stats = groupStats[group.id] ?? {
                 filled: 0,
-                total: group.tests.length,
+                total: getEntryTests(group.tests).length,
               };
               const isComplete =
                 stats.total > 0 && stats.filled === stats.total;
@@ -283,10 +294,12 @@ function TestGroupDetailForm({
   isAllGroupsComplete: boolean;
   onNext: () => void;
 }) {
-  const filledCount = group.tests.filter(
+  const entryTests = getEntryTests(group.tests);
+  const filledCount = entryTests.filter(
     (test) => getLiveStatus(test.id) !== "empty",
   ).length;
-  const isComplete = filledCount === group.tests.length;
+  const isComplete =
+    entryTests.length === 0 || filledCount === entryTests.length;
 
   return (
     <Card className="min-w-0 overflow-hidden rounded-xl border-none shadow-sm ring-1 ring-foreground/10">
@@ -313,7 +326,7 @@ function TestGroupDetailForm({
                 {group.testGroup.name}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {filledCount} of {group.tests.length} parameters filled
+                {filledCount} of {entryTests.length} parameters filled
               </p>
             </div>
           </div>
@@ -350,7 +363,7 @@ function TestGroupDetailForm({
           </div>
 
           <div className="divide-y">
-            {group.tests.map((test) => {
+            {entryTests.map((test) => {
               const fieldIndex = getFieldIndex(test.id);
               const status = getLiveStatus(test.id);
               const cfg = STATUS_CONFIG[status];
@@ -468,7 +481,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   const allTests = useMemo(
     () =>
       report.testGroups.flatMap((group) =>
-        group.tests.map((test) => ({
+        getEntryTests(group.tests).map((test) => ({
           id: test.id,
           resultValue: test.resultValue ?? "",
         })),
@@ -477,7 +490,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   );
 
   const hasExistingResults = report.testGroups.some((group) =>
-    group.tests.some((test) => test.resultValue),
+    getEntryTests(group.tests).some((test) => test.resultValue),
   );
 
   const form = useForm<ReportFormValues>({
@@ -498,8 +511,9 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
     const stats: GroupStats = {};
 
     for (const group of report.testGroups) {
-      const total = group.tests.length;
-      const filled = group.tests.filter((test) => {
+      const entryTests = getEntryTests(group.tests);
+      const total = entryTests.length;
+      const filled = entryTests.filter((test) => {
         const item = watchedTests?.find((entry) => entry.id === test.id);
         return Boolean(item?.resultValue?.trim());
       }).length;
@@ -521,7 +535,8 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   const overallPct =
     totalTests > 0 ? Math.round((totalFilled / totalTests) * 100) : 0;
 
-  const isAllGroupsComplete = totalTests > 0 && totalFilled === totalTests;
+  const isAllGroupsComplete =
+    totalTests === 0 || totalFilled === totalTests;
 
   function getFieldIndex(testId: string) {
     return form.getValues("tests").findIndex((item) => item.id === testId);
@@ -552,7 +567,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   async function handleNext() {
     if (!activeGroup) return;
 
-    const fieldNames = activeGroup.tests.map(
+    const fieldNames = getEntryTests(activeGroup.tests).map(
       (test) => `tests.${getFieldIndex(test.id)}.resultValue` as const,
     );
     const isCurrentGroupValid = await form.trigger(fieldNames);

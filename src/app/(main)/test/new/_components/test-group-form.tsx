@@ -95,6 +95,20 @@ export function TestGroupForm({
     name: "testRows",
   });
 
+  const watchedTestRows = form.watch("testRows");
+
+  function handleOptionalChange(index: number, checked: boolean) {
+    form.setValue(`testRows.${index}.optional`, checked);
+
+    if (checked) {
+      form.setValue(`testRows.${index}.testName`, "");
+      form.setValue(`testRows.${index}.unit`, "");
+      form.setValue(`testRows.${index}.normalMale`, "");
+      form.setValue(`testRows.${index}.normalFemale`, "");
+      setOpenIndex((current) => (current === index ? null : current));
+    }
+  }
+
   function onSubmit(value: TestGroupFormValuesType) {
     startTransition(async () => {
       if (mode === "edit") {
@@ -321,7 +335,10 @@ export function TestGroupForm({
             Add Test Row
           </Button>
 
-          {fields.map((field, index) => (
+          {fields.map((field, index) => {
+            const isOptionalRow = Boolean(watchedTestRows?.[index]?.optional);
+
+            return (
             <div
               key={field.id}
               className="col-span-12 gap-4 border border-inpuut p-4 rounded-lg flex items-center"
@@ -346,6 +363,7 @@ export function TestGroupForm({
                         id={`testRows.${index}.testName`}
                         placeholder="e.g. HGB"
                         {...field}
+                        disabled={isOptionalRow}
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
@@ -366,6 +384,9 @@ export function TestGroupForm({
                     >
                       <FieldLabel htmlFor={`testRows.${index}.fullName`}>
                         Full Name
+                        {isOptionalRow ? (
+                          <span className="text-destructive"> *</span>
+                        ) : null}
                       </FieldLabel>
                       <Input
                         id={`testRows.${index}.fullName`}
@@ -392,6 +413,7 @@ export function TestGroupForm({
                       units={testUnit}
                       openIndex={openIndex}
                       setOpenIndex={setOpenIndex}
+                      disabled={isOptionalRow}
                     />
                   )}
                 />
@@ -411,6 +433,7 @@ export function TestGroupForm({
                         id={`testRows.${index}.normalMale`}
                         placeholder="e.g. 13 - 17"
                         {...field}
+                        disabled={isOptionalRow}
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
@@ -436,6 +459,7 @@ export function TestGroupForm({
                         id={`testRows.${index}.normalFemale`}
                         placeholder="e.g. 12 - 15"
                         {...field}
+                        disabled={isOptionalRow}
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
@@ -459,7 +483,9 @@ export function TestGroupForm({
                         id={`testRows.${index}.optional`}
                         name={field.name}
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) =>
+                          handleOptionalChange(index, checked === true)
+                        }
                       />
                       <FieldLabel htmlFor={`testRows.${index}.optional`}>
                         Optional
@@ -478,7 +504,8 @@ export function TestGroupForm({
                 </Button>
               </div>
             </div>
-          ))}
+          );
+          })}
 
           <Controller
             name="interpretation"
@@ -546,6 +573,7 @@ function UnitCombobox({
   units,
   openIndex,
   setOpenIndex,
+  disabled = false,
 }: any) {
   const selectedUnit = units.find(
     (item: { id: string; name: string }) => item.id === field.value,
@@ -564,8 +592,12 @@ function UnitCombobox({
     >
       <FieldLabel htmlFor={`testRows.${index}.unit`}>Unit</FieldLabel>
       <Popover
-        open={openIndex === index}
-        onOpenChange={(isOpen) => setOpenIndex(isOpen ? index : null)}
+        open={!disabled && openIndex === index}
+        onOpenChange={(isOpen) => {
+          if (!disabled) {
+            setOpenIndex(isOpen ? index : null);
+          }
+        }}
       >
         <PopoverTrigger
           render={
@@ -573,6 +605,8 @@ function UnitCombobox({
               id={`testRows.${index}.unit`}
               variant="outline"
               role="combobox"
+              type="button"
+              disabled={disabled}
               aria-expanded={openIndex === index}
               aria-invalid={fieldState.invalid}
               className={cn(

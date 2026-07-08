@@ -127,10 +127,12 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
                       {test.name.slice(0, 2).toUpperCase()}
                     </span> */}
                         <div>
-                          <p className="text-xs font-medium text-slate-700">
-                            {test.name}
+                          <p
+                            className={`text-xs ${test.isOptionalTest ? "font-bold" : "font-medium text-slate-700"}`}
+                          >
+                            {test.isOptionalTest ? test.fullName : test.name}
                           </p>
-                          {test.fullName && (
+                          {test.fullName && !test.isOptionalTest && (
                             <p className="text-[10px] font-medium text-slate-500">
                               {test.fullName}
                             </p>
@@ -144,18 +146,18 @@ export function Report({ testGroupItem, pataient }: Readonly<ReportProps>) {
                       <span
                         className={`font-mono text-xs ${VALUE_CLS[status]}`}
                       >
-                        {item.resultValue}
+                        {!test.isOptionalTest && item.resultValue}
                       </span>
                     </TableCell>
 
                     {/* Unit */}
                     <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
-                      {unit}
+                      {!test.isOptionalTest && unit}
                     </TableCell>
 
                     {/* Reference range */}
                     <TableCell className="py-2 text-center font-mono text-xs text-slate-500">
-                      {referenceRange}
+                      {!test.isOptionalTest && referenceRange}
                     </TableCell>
                   </TableRow>
                 );

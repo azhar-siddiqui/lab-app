@@ -7,6 +7,10 @@ import {
   TestGroupFormValuesType,
 } from "@/validation/test-group";
 import { invalidateLabData } from "@/lib/invalidate-lab-cache";
+import {
+  normalizeTestRowForSave,
+  resolveTestUnitId,
+} from "@/lib/normalize-test-row";
 import { unauthorized } from "next/navigation";
 
 export async function CreateTestGroup(
@@ -25,6 +29,24 @@ export async function CreateTestGroup(
     };
   }
 
+  const tests = await Promise.all(
+    result.data.testRows.map(async (test, index) => {
+      const normalized = normalizeTestRowForSave(test);
+      const testUnitId = await resolveTestUnitId(user.id, normalized.unit);
+
+      return {
+        position: index + 1,
+        name: normalized.testName,
+        fullName: normalized.fullName?.trim() || null,
+        normalValueMale: normalized.normalMale,
+        normalValueFemale: normalized.normalFemale,
+        isOptionalTest: normalized.optional ?? false,
+        userId: user.id,
+        testUnitId,
+      };
+    }),
+  );
+
   await prisma.testGroup.create({
     data: {
       name: result.data.testGroupName,
@@ -36,18 +58,8 @@ export async function CreateTestGroup(
       interpretation: result.data.interpretation,
       testCategoryId: result.data.category,
       userId: user.id,
-
       tests: {
-        create: result.data.testRows.map((test, index) => ({
-          position: index + 1,
-          name: test.testName,
-          fullName: test.fullName?.trim() || null,
-          normalValueMale: test.normalMale,
-          normalValueFemale: test.normalFemale,
-          isOptionalTest: test.optional,
-          userId: user.id,
-          testUnitId: test.unit,
-        })),
+        create: tests,
       },
     },
   });
