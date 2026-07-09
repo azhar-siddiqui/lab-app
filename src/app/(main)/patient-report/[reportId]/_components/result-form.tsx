@@ -378,6 +378,7 @@ function TestGroupDetailForm({
                 >
                   <div className="min-w-0 @3xl:col-span-4 @3xl:pr-3">
                     <p className="text-sm font-medium">{test.test.name}</p>
+                    <p className="text-xs font-medium">{test.test.fullName}</p>
                   </div>
 
                   <div className="mt-3 @3xl:col-span-3 @3xl:mt-0 @3xl:pr-4">
@@ -535,8 +536,7 @@ export function ResultForm({ report }: Readonly<ResultFormProps>) {
   const overallPct =
     totalTests > 0 ? Math.round((totalFilled / totalTests) * 100) : 0;
 
-  const isAllGroupsComplete =
-    totalTests === 0 || totalFilled === totalTests;
+  const isAllGroupsComplete = totalTests === 0 || totalFilled === totalTests;
 
   function getFieldIndex(testId: string) {
     return form.getValues("tests").findIndex((item) => item.id === testId);

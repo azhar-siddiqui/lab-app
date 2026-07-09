@@ -32,7 +32,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon, ChevronsUpDownIcon, Loader, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Fragment, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UnitForm } from "./unit-form";
@@ -241,26 +241,24 @@ export function TestGroupForm({
                         <CommandInput placeholder="Search Category..." />
                         <CommandList>
                           <CommandEmpty>No item found.</CommandEmpty>
-                          {testCategories.map((item) => (
-                            <Fragment key={item.id}>
-                              <CommandGroup>
-                                <CommandItem
-                                  key={item.id}
-                                  value={item.id} // Use ID as the value
-                                  onSelect={(currentValue: string) => {
-                                    field.onChange(currentValue); // Set the ID in the form field
-                                    setOpen(false);
-                                  }}
-                                  className="pl-6 rounded-none"
-                                >
-                                  {item.name}
-                                  {field.value === item.id && (
-                                    <CheckIcon size={16} className="ml-auto" />
-                                  )}
-                                </CommandItem>
-                              </CommandGroup>
-                            </Fragment>
-                          ))}
+                          <CommandGroup>
+                            {testCategories.map((item) => (
+                              <CommandItem
+                                key={item.id}
+                                value={item.name}
+                                keywords={[item.name]}
+                                onSelect={() => {
+                                  field.onChange(item.id);
+                                  setOpen(false);
+                                }}
+                              >
+                                {item.name}
+                                {field.value === item.id && (
+                                  <CheckIcon size={16} className="ml-auto" />
+                                )}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
                         </CommandList>
                       </Command>
                     </PopoverContent>
